@@ -1,3 +1,5 @@
+import numpy as np
+
 class Pauli:
     
     def __init__(self):
@@ -8,12 +10,12 @@ class Pauli:
              [1, 1j, -1j, 1]]
         
         
-    def Product(self, a, b):
+    def product(self, a, b):
         p = (a + b*self.rules[a])%4
         return p
     
     
-    def Commutator(self, A, B):
+    def commutator(self, A, B):
     
         C = ()
 
@@ -21,7 +23,7 @@ class Pauli:
         backwardsign = 1
 
         for i in range(len(A)):
-            C += (self.Product(A[i],B[i]),)
+            C += (self.product(A[i],B[i]),)
             forwardsign = forwardsign * self.sign_rules[A[i]][B[i]]
             backwardsign = backwardsign * self.sign_rules[B[i]][A[i]]
 
@@ -36,18 +38,143 @@ class Pauli:
         
         label = {0: "I", 1: "X", 2: "Y", 3: "Z"}
         C=[]
+
+        if A == []:
+
+            pass
         
-        for i in range(len(A)):
-            B=""
-            for j in range(len(A[i])):
-                B += label[A[i][j]]
-            C.append(B)
+        elif type(A[0][1]) != tuple:
+        
+            for i in range(len(A)):
+                B=""
+                for j in range(len(A[i])):
+                    B += label[A[i][j]]
+                C.append(B)
+
+        else:
+
+            D=[]
+            a=[]
+
+            for i in range(len(A)):
+                B=""
+                a.append(A[i][0])
+                for j in range(len(A[i][-1])):
+                    B += label[A[i][-1][j]]
+                D.append(B)
             
-        return C
+            C = list(zip(a,D))
+            
+        print(C)
+
+
+class functions(Pauli):
+
+    
+    def __init__(self):
+        Pauli.__init__(self)
+
+
+    def mut_irr(self, n, x = np.pi):
+
+        y = x%1
+    
+        if n > 1:
+            return self.mut_irr(n-1, np.pi*y)
+    
+        else:
+            return y
+
+
+    def prepare(self, a, A):
+
+        if type(A) == tuple:
+            
+            return [(a, A)]
+
+        else:
+            
+            X = list(zip(a, A))
+                
+            return X
+
+    
+    def fullprod(self, Xp, Yp):
+
+        prelist = []
+        Alist = []
+        Z = []
+        
+        for i in range(len(Xp)):
+            for j in range(len(Yp)):
+
+                A = ()
+                prefactor = Xp[i][0] * Yp[j][0]
+                
+                for k in range(len(Xp[i][1])):
+                    
+                    A += (self.product(Xp[i][1][k], Yp[j][1][k]),)
+                    prefactor = prefactor * self.sign_rules[Xp[i][1][k]][Yp[j][1][k]]
+
+                if A not in Alist:
+                    Alist.append(A)
+                    prelist.append(prefactor)
+                    
+
+                else:
+                    index = Alist.index(A)
+                    prefactor += prelist[index]
+
+                    if abs(prefactor) != 0:
+                        prelist[index] = prefactor
+
+                    else:
+                        Alist.pop(index)
+                        prelist.pop(index)
+
+        Zp = list(zip(prelist, Alist))
+
+        return Zp
+
+    
+    def euler(self, a, A):
+        
+        I = (0,)*len(A)
+        Xp = self.prepare(np.cos(a), I)
+        Yp = self.prepare(1j*np.sin(a), A)
+
+        return Xp + Yp 
+
+    
+    def KXK(self, a, K_r, Xp):
+
+        b = a if type(a) == list else [a]
+        K = K_r if type(K_r) == list else [K_r]
+        Zp = Xp
+
+        for i in range(len(K)):
+        
+            Kp = self.euler(b[-(1+i)], K[-(1+i)])
+            Kdagp = self.euler(-b[-(1+i)], K[-(1+i)])
+            Yp = self.fullprod(Kp, Zp)
+            Zp = self.fullprod(Yp, Kdagp)
+
+        return Zp 
+
+    
+    def trace(self, X):
+        t = 0
+    
+        for i in range(len(X)):
+    
+            if X[i][1] == (0,)*len(X[i][1]):
+                t += X[i][0]
+    
+        return t
 
 
 
-class Cartan:
+class Hamiltonians:
     
     
     def __init__(self, N, model = None):
@@ -55,11 +182,13 @@ class Cartan:
         self.model = model
         
         
-    def Hamiltonian(self):
+    def Hamiltonian(self, coeff = None):
     
         if self.model == 'TFIM':
             H = []
-            #l = [0]*self.N
+            p = []
+            x = [1]*self.N if coeff == None else coeff
+            
 
             for i in range(self.N-1):
 
@@ -67,20 +196,24 @@ class Cartan:
                 l[i] = 1
                 l[i+1] = 1
                 H.append(tuple(l))
+                p.append(1)
 
                 l = [0]*self.N
                 l[i] = 3
                 H.append(tuple(l))
+                p.append(x[i])
 
             l = [0]*self.N
             l[self.N-1] = 3
             H.append(tuple(l))
+            p.append(x[-1])
 
-            return H
+            return H, p
         
            
         elif self.model == 'XY':
             H = []
+            p = [1]*2*(self.N-1)
             #l = [0]*self.N
 
             for i in range(self.N-1):
@@ -95,12 +228,13 @@ class Cartan:
                 l[i+1] = 2
                 H.append(tuple(l))
 
-            return H 
+            return H, p
         
         
         elif self.model == 'TFXY':
             H = []
-            #l = [0]*self.N
+            p = []
+            x = [1]*self.N if coeff == None else coeff
 
             for i in range(self.N-1):
 
@@ -108,21 +242,25 @@ class Cartan:
                 l[i] = 1
                 l[i+1] = 1
                 H.append(tuple(l))
+                p.append(1)
                 
                 l = [0]*self.N
                 l[i] = 2
                 l[i+1] = 2
                 H.append(tuple(l))
+                p.append(1)
 
                 l = [0]*self.N
                 l[i] = 3
                 H.append(tuple(l))
+                p.append(x[i])
 
             l = [0]*self.N
             l[self.N-1] = 3
             H.append(tuple(l))
+            p.append(x[-1])
 
-            return H
+            return H, p
         
         
         elif self.model == 'TFXYY':
@@ -159,6 +297,7 @@ class Cartan:
         
         elif self.model == 'Heisenberg':
             H = []
+            p = [1]*3*(self.N-1)
             #l = [0]*self.N
 
             for i in range(self.N-1):
@@ -178,12 +317,13 @@ class Cartan:
                 l[i+1] = 3
                 H.append(tuple(l))
                 
-            return H
+            return H, p
         
         
         elif self.model == 'CFXY':
             H = []
-            #l = [0]*self.N
+            p = []
+            x = [(1,1)]*self.N if coeff == None else coeff
 
             for i in range(self.N-1):
 
@@ -191,29 +331,35 @@ class Cartan:
                 l[i] = 1
                 l[i+1] = 1
                 H.append(tuple(l))
+                p.append(1)
                 
                 l = [0]*self.N
                 l[i] = 2
                 l[i+1] = 2
                 H.append(tuple(l))
+                p.append(1)
 
                 l = [0]*self.N
                 l[i] = 3
                 H.append(tuple(l))
+                p.append(x[i][0])
                 
                 l = [0]*self.N
                 l[i] = 2
                 H.append(tuple(l))
+                p.append(x[i][1])
 
             l = [0]*self.N
             l[self.N-1] = 3
             H.append(tuple(l))
+            p.append(x[-1][0])
             
             l = [0]*self.N
             l[self.N-1] = 2
             H.append(tuple(l))
+            p.append(x[-1][1])
 
-            return H
+            return H, p
    
 
         else:
@@ -221,13 +367,12 @@ class Cartan:
             return []
     
     
-    def Algebra(self):
+    def algebra(self):
         
-        g = self.Hamiltonian()
+        g = self.Hamiltonian()[0]
         s = [-1]*len(g)
         finalindex = len(g) - 1
         initialindex = -1
-        P = Pauli()
         t = True
         cont = False
         
@@ -236,7 +381,7 @@ class Cartan:
             
             for i in range(finalindex, initialindex, -1):
                 for j in range(i-1, -1, -1):
-                    Com = P.Commutator(g[i],g[j])
+                    Com = Pauli().commutator(g[i],g[j])
                     sign = s[i]*s[j]
 
                     if Com != 0:
@@ -256,10 +401,19 @@ class Cartan:
             
         return g, s, cont
         
-        
+
+
+class Cartan(Hamiltonians):
+
+
+    def __init__(self, N, model = None):
+        Hamiltonians.__init__(self, N, model)
+
+    
+    
     def decomposition(self):
         
-        A = self.Algebra()[0]
+        A = self.algebra()[0]
         k = []
         m = []
         #c = []
@@ -287,12 +441,11 @@ class Cartan:
 
             
         h = [m_sorted[0]]
-        P = Pauli()
         
         for i in range(1,len(m_sorted)):
             for j in range(len(h)):
                 
-                if P.Commutator(m_sorted[i],h[j]) != 0:
+                if Pauli().commutator(m_sorted[i],h[j]) != 0:
                     break
                     
                 elif j == len(h)-1:
