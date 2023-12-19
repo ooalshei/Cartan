@@ -242,6 +242,51 @@ class Hamiltonian:
 
             return string_list, coefficient_list
 
+        elif self.model == "fermion_ring":
+
+            string_list = []
+            coefficient_list = []
+            parameters = [1, np.pi / 4] if coefficients is None else coefficients.copy()
+
+            for i in range(self.N - 1):
+                l = [0] * self.N
+                l[i] = 1
+                l[i + 1] = 1
+                string_list.append(tuple(l))
+                coefficient_list.append(-parameters[0] / 2)
+
+                l = [0] * self.N
+                l[i] = 2
+                l[i + 1] = 2
+                string_list.append(tuple(l))
+                coefficient_list.append(-parameters[0] / 2)
+
+            l = [3] * self.N
+            l[0] = 1
+            l[-1] = 1
+            string_list.append(l)
+            coefficient_list.append(-parameters[0] * np.cos(parameters[1]) / 2)
+
+            l = [3] * self.N
+            l[0] = 2
+            l[-1] = 2
+            string_list.append(l)
+            coefficient_list.append(-parameters[0] * np.cos(parameters[1]) / 2)
+
+            l = [3] * self.N
+            l[0] = 1
+            l[-1] = 2
+            string_list.append(l)
+            coefficient_list.append(-parameters[0] * np.sin(parameters[1]) / 2)
+
+            l = [3] * self.N
+            l[0] = 2
+            l[-1] = 1
+            string_list.append(l)
+            coefficient_list.append(parameters[0] * np.sin(parameters[1]) / 2)
+
+            return string_list, coefficient_list
+
         else:
             return []
 
