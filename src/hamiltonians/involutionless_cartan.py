@@ -2,7 +2,6 @@
 # Created on December 18, 2023
 
 
-
 ################## Imports ##################
 from ..pauli_helpers import pauli_operations
 from ..hamiltonians import cartan
@@ -46,8 +45,8 @@ class InvolutionlessCartan(cartan.CartanDecomposition):
             initial_index = final_index
             final_index = len(algebra_list) - 1
 
+        sorting_list = [self.N - string.count(0) for string in algebra_list]
         if contradiction:
-            sorting_list = [self.N - string.count(0) for string in algebra_list]
             sorted_algebra_list = [string for _, string in sorted(zip(sorting_list, algebra_list))]
             subalgebra_strings = [sorted_algebra_list[0]]
 
@@ -63,7 +62,6 @@ class InvolutionlessCartan(cartan.CartanDecomposition):
             return {"DLA": algebra_list, "h": subalgebra_strings, "contradiction": contradiction}
 
         else:
-            sorting_list = [self.N - string.count(0) for string in algebra_list]
             sorted_m_strings = [string for _, string in sorted(zip(sorting_list, m_strings))]
             subalgebra_strings = [sorted_m_strings[0]]
 
