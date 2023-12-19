@@ -5,7 +5,7 @@
 ################## Imports ##################
 import numpy as np
 
-from ..pauli_helpers import pauli_operations
+from src.cartan.pauli_helpers import pauli_operations
 
 
 #############################################

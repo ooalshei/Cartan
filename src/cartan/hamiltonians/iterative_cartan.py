@@ -4,7 +4,7 @@
 
 from involutionless_cartan import InvolutionlessCartan
 ####################### Imports #######################
-from ..pauli_helpers import pauli_operations
+from src.cartan.pauli_helpers import pauli_operations
 
 
 #######################################################
