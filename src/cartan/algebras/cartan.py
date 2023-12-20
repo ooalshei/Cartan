@@ -396,7 +396,8 @@ class CartanDecomposition(Hamiltonian):
     def decomposition(self, algebra_list: list[tuple[int, ...]] | None = None, involution: str = "even_odd") -> tuple[
         list[tuple[int, ...]], list[tuple[int, ...]], list[tuple[int, ...]]]:
         r"""
-        Finds a Cartan decomposition.
+        Finds a Cartan decomposition. This assumes that we can find a decomposition such that
+        :math:`\mathcal{H} \subset \mathfrak{m}`.
 
         Parameters:
         -----------
