@@ -1,12 +1,12 @@
 # Python version 3.11.5
-# Created on December 19, 2023
+# Modified on December 20, 2023
 
-####################### Imports #######################
+################ Imports ################
 import numpy as np
 import scipy.linalg as la
-from algebras.involutionless_cartan import InvolutionlessCartan
+from algebras import InvolutionlessCartan
 
-#######################################################
+#########################################
 
 STRING_TO_MATRIX = {'I': [[1, 0], [0, 1]], 'X': [[0, 1], [1, 0]], 'Y': [[0, -1j], [1j, 0]], 'Z': [[1, 0], [0, -1]],
                     0: [[1, 0], [0, 1]], 1: [[0, 1], [1, 0]], 2: [[0, -1j], [1j, 0]], 3: [[1, 0], [0, -1]]}

@@ -1,13 +1,12 @@
 # Python version 3.11.5
-# Created on December 18, 2023
+# Modified on December 20, 2023
 
 
-from involutionless_cartan import InvolutionlessCartan
-####################### Imports #######################
-from src.cartan import pauli_operations
+############# Imports #############
+from .. import pauli_operations
+from . import InvolutionlessCartan
 
-
-#######################################################
+###################################
 
 
 class IterativeCartan(InvolutionlessCartan):

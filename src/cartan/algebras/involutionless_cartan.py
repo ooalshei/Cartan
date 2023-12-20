@@ -1,15 +1,15 @@
 # Python version 3.11.5
-# Created on December 18, 2023
+# Modified on December 20, 2023
 
 
-################## Imports ##################
+############### Imports ###############
 from .. import pauli_operations
-from ..algebras import cartan
+from cartan import CartanDecomposition
 
-#############################################
+#######################################
 
 
-class InvolutionlessCartan(cartan.CartanDecomposition):
+class InvolutionlessCartan(CartanDecomposition):
 
     def __init__(self, number_of_sites, model):
         super().__init__(number_of_sites, model)
