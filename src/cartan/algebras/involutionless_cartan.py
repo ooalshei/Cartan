@@ -4,7 +4,7 @@
 
 ############### Imports ###############
 from .. import pauli_operations
-from cartan import CartanDecomposition
+from .cartan import CartanDecomposition
 
 #######################################
 
@@ -29,7 +29,7 @@ class InvolutionlessCartan(CartanDecomposition):
             t = False
             for i in range(final_index, initial_index, -1):
                 for j in range(i - 1, -1, -1):
-                    string, s, c = pauli_operations.string_product(algebra_list[i], algebra_list[j])
+                    string, _, c = pauli_operations.string_product(algebra_list[i], algebra_list[j])
                     sign = sign_list[i] * sign_list[j]
 
                     if not c:
