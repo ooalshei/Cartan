@@ -1,6 +1,12 @@
 # Python version 3.11.5
-# Created on December 18, 2023
+# Modified on December 19, 2023
 
+"""
+Cartan
+------
+This module contains methods that build Pauli strings given a Hamiltonian, generate the dynamical Lie algebra, and find
+Cartan decompositions. The identity along with the three Pauli matrices are referred to as (0, 1, 2, 3).
+"""
 
 ################## Imports ##################
 import numpy as np
@@ -11,17 +17,52 @@ from src.cartan.pauli_helpers import pauli_operations
 #############################################
 
 class Hamiltonian:
+    """
+    This class builds Pauli strings of the Hamiltonians of some known models and constructs the dynamical Lie algebra,
+    which is the set of nested commutators of terms in the Hamiltonian. Models currently included are:
+        - Transverse field Ising model: XX + Z
+        - XY model: XX + YY
+        - Transverse field XY model: XX + YY + Z
+        - Heisenberg model: XX + YY + ZZ
+        - Cross field XY model: XX + YY + Z + Y
+        - 6-site UCC model
+        - Schwinger model: XX + YY + ZZ + Z
+        - Fermions on a ring in a magnetic field: XX + YY + XZ...ZX + YZ...ZY + XZ...ZY - YZ...ZX
 
-    def __init__(self, number_of_sites, model=None):
+    Attributes:
+    -----------
+    number_of_sites: int
+        Number of sites.
+    model: {"TFIM", "XY", "TFXY", "Heisenberg", "CFXY", "UCC", "Schwinger", "fermion_ring"}, optional
+        Model name.
+    """
+
+    def __init__(self, number_of_sites: int, model: str | None = None) -> None:
         self.N = number_of_sites
         self.model = model
 
-    def builder(self, coefficients=None):
+    def builder(self, parameters: list[float | int, ...] | None = None) -> tuple[list[tuple[int, ...]], list[float]]:
+        """
+        Builds Pauli strings for the specified model. Returns an empty list if no model is specified.
+
+        Parameters:
+        -----------
+        parameters: any, optional
+            The model parameters. If not specified, ferromagnetism is assumed with J = 1.
+
+        Returns:
+        --------
+        string_list: list[tuple[int, ...], ...] | list[]
+            List of Hamiltonian Pauli strings.
+        coefficient_list: list[float, ...]
+            List of coefficients. Both lists should be of tha same length. Each term corresponds to the respective term
+            in string_list.
+        """
 
         if self.model == 'TFIM':
             string_list = []
             coefficient_list = []
-            x = [1] * self.N if coefficients is None else coefficients
+            x = [1] * self.N if parameters is None else parameters
 
             for i in range(self.N - 1):
                 l = [0] * self.N
@@ -44,7 +85,7 @@ class Hamiltonian:
 
         elif self.model == 'XY':
             string_list = []
-            coefficient_list = [1] * 2 * (self.N - 1)
+            coefficient_list = [-1] * 2 * (self.N - 1) if parameters is None else parameters
 
             for i in range(self.N - 1):
                 l = [0] * self.N
@@ -62,20 +103,20 @@ class Hamiltonian:
         elif self.model == 'TFXY':
             string_list = []
             coefficient_list = []
-            x = [1] * self.N if coefficients is None else coefficients
+            x = [1] * self.N if parameters is None else parameters
 
             for i in range(self.N - 1):
                 l = [0] * self.N
                 l[i] = 1
                 l[i + 1] = 1
                 string_list.append(tuple(l))
-                coefficient_list.append(1)
+                coefficient_list.append(-1)
 
                 l = [0] * self.N
                 l[i] = 2
                 l[i + 1] = 2
                 string_list.append(tuple(l))
-                coefficient_list.append(1)
+                coefficient_list.append(-1)
 
                 l = [0] * self.N
                 l[i] = 3
@@ -89,38 +130,38 @@ class Hamiltonian:
 
             return string_list, coefficient_list
 
-        elif self.model == 'TFXYY':
-            string_list = []
-
-            for i in range(self.N - 1):
-                l = [0] * self.N
-                l[i] = 1
-                l[i + 1] = 1
-                string_list.append(tuple(l))
-
-                l = [0] * self.N
-                l[i] = 2
-                l[i + 1] = 2
-                string_list.append(tuple(l))
-
-                l = [0] * self.N
-                l[i] = 1
-                l[i + 1] = 2
-                string_list.append(tuple(l))
-
-                l = [0] * self.N
-                l[i] = 3
-                string_list.append(tuple(l))
-
-            l = [0] * self.N
-            l[self.N - 1] = 3
-            string_list.append(tuple(l))
-
-            return string_list
+        # elif self.model == 'TFXYY':
+        #     string_list = []
+        #
+        #     for i in range(self.N - 1):
+        #         l = [0] * self.N
+        #         l[i] = 1
+        #         l[i + 1] = 1
+        #         string_list.append(tuple(l))
+        #
+        #         l = [0] * self.N
+        #         l[i] = 2
+        #         l[i + 1] = 2
+        #         string_list.append(tuple(l))
+        #
+        #         l = [0] * self.N
+        #         l[i] = 1
+        #         l[i + 1] = 2
+        #         string_list.append(tuple(l))
+        #
+        #         l = [0] * self.N
+        #         l[i] = 3
+        #         string_list.append(tuple(l))
+        #
+        #     l = [0] * self.N
+        #     l[self.N - 1] = 3
+        #     string_list.append(tuple(l))
+        #
+        #     return string_list
 
         elif self.model == 'Heisenberg':
             string_list = []
-            coefficient_list = [1] * 3 * (self.N - 1)
+            coefficient_list = [-1] * 3 * (self.N - 1) if parameters is None else parameters
 
             for i in range(self.N - 1):
                 l = [0] * self.N
@@ -143,20 +184,20 @@ class Hamiltonian:
         elif self.model == 'CFXY':
             string_list = []
             coefficient_list = []
-            x = [(1, 1)] * self.N if coefficients is None else coefficients
+            x = [(1, 1)] * self.N if parameters is None else parameters
 
             for i in range(self.N - 1):
                 l = [0] * self.N
                 l[i] = 1
                 l[i + 1] = 1
                 string_list.append(tuple(l))
-                coefficient_list.append(1)
+                coefficient_list.append(-1)
 
                 l = [0] * self.N
                 l[i] = 2
                 l[i + 1] = 2
                 string_list.append(tuple(l))
-                coefficient_list.append(1)
+                coefficient_list.append(-1)
 
                 l = [0] * self.N
                 l[i] = 3
@@ -197,7 +238,7 @@ class Hamiltonian:
 
             string_list = []
             coefficient_list = []
-            x = [1, 1] if coefficients is None else coefficients
+            x = [1, 1] if parameters is None else parameters
 
             def double(n):
                 return (self.N - n) * (self.N - n + 1)
@@ -246,7 +287,7 @@ class Hamiltonian:
 
             string_list = []
             coefficient_list = []
-            parameters = [1, np.pi / 4] if coefficients is None else coefficients.copy()
+            parameters = [1, np.pi / 4] if parameters is None else parameters.copy()
 
             for i in range(self.N - 1):
                 l = [0] * self.N
@@ -288,9 +329,22 @@ class Hamiltonian:
             return string_list, coefficient_list
 
         else:
-            return []
+            return []  # type: ignore
 
-    def algebra(self, hamiltonian_list=None):
+    def algebra(self, hamiltonian_list: list[tuple[int, ...]] | None = None) -> list[tuple[int, ...]]:
+        """
+        Constructs the dynamical Lie algebra. This is the nested commutators of the individual Hamiltonian terms.
+
+        Parameters:
+        -----------
+        hamiltonian_list: list[tuple[int, ...]] | None, optional
+            Strings representing the Hamiltonian. If not provided, the object model will be assumed.
+
+        Returns:
+        --------
+        algebra_list: list[tuple[int, ...]]
+            Strings representing the dynamical Lie algebra.
+        """
 
         algebra_list = self.builder()[0].copy() if hamiltonian_list is None else hamiltonian_list.copy()
         final_index = len(algebra_list) - 1
@@ -315,11 +369,52 @@ class Hamiltonian:
 
 
 class CartanDecomposition(Hamiltonian):
+    r"""
+    This class finds a Cartan decomposition of a provided algebra. A Cartan decomposition of a semisimple Lie algebra is
+    an orthogonal split :math:`\mathfrak{g} = \mathfrak{k} \oplus \mathfrak{m}` such that
 
-    def __init__(self, number_of_sites, model):
+    .. math::
+
+        [\mathfrak{k}, \mathfrak{k}]\subseteq \mathfrak{k}, \qquad [\mathfrak{m}, \mathfrak{m}]\subseteq \mathfrak{k},
+        \qquad [\mathfrak{k}, \mathfrak{m}]\subseteq \mathfrak{m}.
+
+    A Cartan subalgebra :math:`\mathfrak{h}` is a maximal Abelian subalgebra in :math:`\mathfrak{m}`.
+    To find a Cartan decomposition, one can use an involution which would immediately yield an orthogonal split:
+    :math:`\Theta (\mathfrak{k}) = \mathfrak{k}` and :math:`\Theta (\mathfrak{m}) = -\mathfrak{m}`. Currently only one
+    involution is included, which counts the number of Y in a Pauli string.
+
+    Attributes:
+    -----------
+    number_of_sites: int
+        Number of sites.
+    model: {"TFIM", "XY", "TFXY", "Heisenberg", "CFXY", "UCC", "Schwinger", "fermion_ring"}, optional
+        Model name.
+    """
+
+    def __init__(self, number_of_sites: int, model: str | None = None) -> None:
         super().__init__(number_of_sites, model)
 
-    def decomposition(self, algebra_list=None, involution="even_odd"):
+    def decomposition(self, algebra_list: list[tuple[int, ...]] | None = None, involution: str = "even_odd") -> tuple[
+        list[tuple[int, ...]], list[tuple[int, ...]], list[tuple[int, ...]]]:
+        r"""
+        Finds a Cartan decomposition.
+
+        Parameters:
+        -----------
+        algebra_list: list[tuple[int, ...]], optional
+            List of Pauli strings to decompose. If not provided, the object model will be assumed.
+        involution: str, default="even_odd"
+            The involution to be used.
+
+        Returns:
+        --------
+        k_strings: list[tuple[int, ...]]
+            List of strings in :math:`\mathfrak{k}`.
+        m_strings: list[tuple[int, ...]]
+            List of strings in :math:`\mathfrak{m}`.
+        subalgebra_strings: list[tuple[int, ...]]
+            List of strings in :math:`\mathfrak{h}`.
+        """
 
         if algebra_list is None:
             algebra_list = self.algebra()
