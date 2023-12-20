@@ -1,22 +1,22 @@
 # Python version 3.11.5
-# Created on December 19, 2023
+# Modified on December 20, 2023
 
 
+########### Imports ###########
+import numpy as np
 import scipy.optimize as opt
+from .. import pauli_operations
 
-############################## Imports ##############################
-
-
-#####################################################################
+###############################
 
 
 def mut_irr(n: int, x: float = np.pi) -> list[float]:
     """Returns a list of n mutually irrational numbers. Takes the optional argument x irrational to build the set"""
     y = x % 1
-    numbers = [y] * n
+    numbers = [y]
     for i in range(1, n):
         y = (x * y) % 1
-        numbers[i] = y
+        numbers.append(y)
 
     return numbers
 
@@ -27,8 +27,8 @@ def cost_function(angles, algebra_strings, subalgebra_element, hamiltonian_dict)
     return np.real(pauli_operations.trace(sentence2))
 
 
-def cartan_optimizer(hamiltonian_dict, algebra_strings, subalgebra_strings, initial_angles=None, method="BFGS",
-                     tol=1e-6, coefficient_tol=1e-6):
+def optimizer(hamiltonian_dict, algebra_strings, subalgebra_strings, initial_angles=None, method="BFGS",
+              tol=1e-6, coefficient_tol=1e-6):
     angles_initial = np.pi * np.random.rand(len(algebra_strings)) if initial_angles is None else initial_angles.copy()
     numbers = mut_irr(len(subalgebra_strings))
     h_element = dict(zip(subalgebra_strings, numbers))
