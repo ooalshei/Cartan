@@ -11,7 +11,7 @@ Cartan decompositions. The identity along with the three Pauli matrices are refe
 ################## Imports ##################
 import numpy as np
 
-from src.cartan.pauli_helpers import pauli_operations
+from src.cartan import pauli_operations
 
 
 #############################################

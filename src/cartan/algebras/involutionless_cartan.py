@@ -3,8 +3,8 @@
 
 
 ################## Imports ##################
-from ..pauli_helpers import pauli_operations
-from ..hamiltonians import cartan
+from .. import pauli_operations
+from ..algebras import cartan
 
 #############################################
 

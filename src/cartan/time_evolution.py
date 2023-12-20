@@ -4,7 +4,7 @@
 ####################### Imports #######################
 import numpy as np
 import scipy.linalg as la
-from involutionless_cartan import InvolutionlessCartan
+from algebras.involutionless_cartan import InvolutionlessCartan
 
 #######################################################
 
