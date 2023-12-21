@@ -35,6 +35,7 @@ def optimizer(hamiltonian_dict: dict[tuple[int, ...], float], algebra_strings: l
               method: str = "BFGS",
               tol: float = 1e-6, iterations: float = None, coefficient_tol: float = 1e-6) -> tuple[
     list[float], list[tuple[int, ...]], dict[tuple[int, ...], complex], dict[tuple[int, ...], complex]]:
+
     angles = np.pi * np.random.rand(len(algebra_strings)) if initial_angles is None else initial_angles.copy()
     numbers = mut_irr(len(subalgebra_strings))
     h_element = dict(zip(subalgebra_strings, numbers))
@@ -86,9 +87,13 @@ def optimizer(hamiltonian_dict: dict[tuple[int, ...], float], algebra_strings: l
             error_norm = 0
             diagonal_hamiltonian = transformed_hamiltonian.copy()
             for key in transformed_hamiltonian:
+                c = True
                 coefficient = abs(transformed_hamiltonian[key]) ** 2
                 full_norm += coefficient
-                if key not in subalgebra_strings:
+                for string in subalgebra_strings:
+                    if not pauli_operations.string_product(key, string)[2]:
+                        c = False
+                if not c:
                     error_norm += coefficient
                     diagonal_hamiltonian.pop(key)
 
@@ -96,7 +101,7 @@ def optimizer(hamiltonian_dict: dict[tuple[int, ...], float], algebra_strings: l
                 print(f"Iteration {iteration}. Relative error: {np.sqrt(error_norm / full_norm)}")
 
             if np.sqrt(error_norm / full_norm) <= tol or iteration == iterations:
-                print(f"Total iterations: {iteration}")
+                print(f"Total iterations: {iteration}. Relative error: {np.sqrt(error_norm / full_norm)}")
                 return angles, algebra_strings, diagonal_hamiltonian, transformed_hamiltonian
 
     else:
@@ -111,7 +116,11 @@ def optimizer(hamiltonian_dict: dict[tuple[int, ...], float], algebra_strings: l
 
         diagonal_hamiltonian = transformed_hamiltonian.copy()
         for key in transformed_hamiltonian:
-            if key not in subalgebra_strings:
+            c = True
+            for string in subalgebra_strings:
+                if not pauli_operations.string_product(key, string)[2]:
+                    c = False
+            if not c:
                 diagonal_hamiltonian.pop(key)
 
-        return list(angles), algebra_strings, diagonal_hamiltonian, transformed_hamiltonian
+        return angles, algebra_strings, diagonal_hamiltonian, transformed_hamiltonian
