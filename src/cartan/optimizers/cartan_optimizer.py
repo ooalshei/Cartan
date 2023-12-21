@@ -10,26 +10,32 @@ from .. import pauli_operations
 ###############################
 
 
-def mut_irr(n: int, x: float = np.pi) -> list[float]:
+def mut_irr(length: int, seed: float = np.pi) -> list[float]:
     """Returns a list of n mutually irrational numbers. Takes the optional argument x irrational to build the set"""
-    y = x % 1
+    y = seed % 1
     numbers = [y]
-    for i in range(1, n):
-        y = (x * y) % 1
+    for i in range(1, length):
+        y = (seed * y) % 1
         numbers.append(y)
 
     return numbers
 
 
-def cost_function(angles, algebra_strings, subalgebra_element, hamiltonian_dict):
-    sentence1 = pauli_operations.exp_conjugation(algebra_strings, angles, subalgebra_element)
-    sentence2 = pauli_operations.full_product(sentence1, hamiltonian_dict)
+def cost_function(angles: list[float], algebra_strings: list[tuple[int, ...]],
+                  subalgebra_element: dict[tuple[int, ...], float],
+                  hamiltonian_dict: dict[tuple[int, ...], float],
+                  tol: float = 0) -> float:
+    sentence1 = pauli_operations.exp_conjugation(algebra_strings, angles, subalgebra_element, tol)
+    sentence2 = pauli_operations.full_product(sentence1, hamiltonian_dict, tol)
     return np.real(pauli_operations.trace(sentence2))
 
 
-def optimizer(hamiltonian_dict, algebra_strings, subalgebra_strings, initial_angles=None, method="BFGS",
-              tol=1e-6, coefficient_tol=1e-6):
-    angles_initial = np.pi * np.random.rand(len(algebra_strings)) if initial_angles is None else initial_angles.copy()
+def optimizer(hamiltonian_dict: dict[tuple[int, ...], float], algebra_strings: list[tuple[int, ...]],
+              subalgebra_strings: list[tuple[int, ...]], initial_angles: list[float] | None = None,
+              method: str = "BFGS",
+              tol: float = 1e-6, iterations: float = None, coefficient_tol: float = 1e-6) -> tuple[
+    list[float], list[tuple[int, ...]], dict[tuple[int, ...], complex], dict[tuple[int, ...], complex]]:
+    angles = np.pi * np.random.rand(len(algebra_strings)) if initial_angles is None else initial_angles.copy()
     numbers = mut_irr(len(subalgebra_strings))
     h_element = dict(zip(subalgebra_strings, numbers))
 
