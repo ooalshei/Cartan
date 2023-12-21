@@ -304,25 +304,25 @@ class Hamiltonian:
             string = [3] * self.N
             string[0] = 1
             string[-1] = 1
-            string_list.append(string)
+            string_list.append(tuple(string))
             coefficient_list.append(-parameters[0] * np.cos(parameters[1]) / 2)
 
             string = [3] * self.N
             string[0] = 2
             string[-1] = 2
-            string_list.append(string)
+            string_list.append(tuple(string))
             coefficient_list.append(-parameters[0] * np.cos(parameters[1]) / 2)
 
             string = [3] * self.N
             string[0] = 1
             string[-1] = 2
-            string_list.append(string)
+            string_list.append(tuple(string))
             coefficient_list.append(-parameters[0] * np.sin(parameters[1]) / 2)
 
             string = [3] * self.N
             string[0] = 2
             string[-1] = 1
-            string_list.append(string)
+            string_list.append(tuple(string))
             coefficient_list.append(parameters[0] * np.sin(parameters[1]) / 2)
 
             return string_list, coefficient_list
