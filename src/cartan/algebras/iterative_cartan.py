@@ -17,12 +17,24 @@ class IterativeCartan(InvolutionlessCartan):
     def abelian_subalgebra(self, subalgebra=None):
 
         subalgebra_list = self.decomposition(subalgebra)["h"] if subalgebra is None else subalgebra.copy()
-        abelian_strings = [subalgebra_list[0], subalgebra_list[1]]
-        for i in range(len(subalgebra_list)):
-            for j in range(i + 1, len(subalgebra_list)):
-                string = pauli_operations.string_product(subalgebra_list[i], subalgebra_list[j])[0]
-                if string not in abelian_strings:
-                    abelian_strings.append(string)
+        abelian_strings = [subalgebra_list[0]]
+        multiplication_closure = abelian_strings.copy()
+
+        i = 1
+        while not all(string in multiplication_closure for string in subalgebra_list):
+            while True:
+                subalgebra_string = subalgebra_list[i]
+                if subalgebra_string not in multiplication_closure:
+                    abelian_strings.append(subalgebra_string)
+                    i += 1
+                    break
+                else:
+                    i += 1
+
+            for j in range(len(multiplication_closure)):
+                string = pauli_operations.string_product(subalgebra_string, multiplication_closure[j])[0]
+                multiplication_closure.append(string)
+            multiplication_closure.append(subalgebra_string)
 
         return abelian_strings
 
@@ -40,7 +52,7 @@ class IterativeCartan(InvolutionlessCartan):
             subspace_strings = []
             i = 0
             while i < len(algebra_strings):
-                c = pauli_operations.string_product(string, algebra_strings[i])
+                c = pauli_operations.string_product(string, algebra_strings[i])[2]
                 if not c:
                     subspace_strings.append(algebra_strings.pop(i))
                 else:
