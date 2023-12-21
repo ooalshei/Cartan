@@ -12,10 +12,14 @@ import numpy as np
 
 ###################
 
-# These arrays are used to find products of Pauli matrices
+# These arrays are used to find products of Pauli matrices.
 RULES = np.array([1, 3, 1, 3])
 SIGN_RULES = np.array([[1, 1, 1, 1], [1, 1, 1j, -1j], [1, -1j, 1, 1j],
                        [1, 1j, -1j, 1]])
+
+# These arrays are used to convert between the string and tuple representations of Pauli matrices.
+NUMBERS_TO_LETTERS = {0: "-", 1: "X", 2: "Y", 3: "Z"}
+LETTERS_TO_NUMBERS = {"-": 0, "X": 1, "Y": 2, "Z": 3}
 
 
 def product(sigma1: int, sigma2: int) -> int:
@@ -141,6 +145,38 @@ def strings_to_dict(
     return dict(zip(strings_tuple, coefficients_array))
 
 
+def print_letters(sentence: dict[tuple[int, ...], complex] = None,
+                  string_list: list[tuple[int, ...]] = None) -> None:
+    """
+    Prints the Pauli sentence with strings represented as (-, X, Y, Z). Must specify one and only one keyword.
+
+    Parameters:
+    -----------
+    sentence: dict[tuple[int, ...], complex], optional
+        The Pauli sentence as a dictionary with tuples of integers representing the Pauli strings.
+    string_list: list[tuple[int, ...]], optional
+        A list of Pauli strings with tuples of integers representing the Pauli strings.
+
+    """
+    if sentence:
+        letter_dict = {}
+        for key in sentence.keys():
+            string = ""
+            for pauli in key:
+                string += NUMBERS_TO_LETTERS[pauli]
+            letter_dict[string] = sentence[key]
+        print(letter_dict)
+
+    elif string_list:
+        letter_list = []
+        for item in string_list:
+            string = ""
+            for pauli in item:
+                string += NUMBERS_TO_LETTERS[pauli]
+            letter_list.append(string)
+        print(letter_list)
+
+
 def full_sum(sentence1: dict[tuple[int, ...], complex],
              sentence2: dict[tuple[int, ...], complex],
              tol: float = 0) -> dict[tuple[int, ...], complex]:
@@ -226,7 +262,7 @@ def string_exp(string: tuple[int, ...],
 def exp_conjugation(generators: list[tuple[int, ...]] | tuple[int, ...],
                     angles: list[float] | float,
                     sentence: dict[tuple[int, ...], complex],
-                    tol: float = 0) -> dict[tuple[int, ...], complex]:
+                    tol: float = 0) -> dict[tuple[int, ...], float | complex]:
     r"""
     Returns the conjugation of a Pauli sentence :math:`\mathrm{e}^{\mathrm{i} x_{1} P_1} ...
     \mathrm{e}^{\mathrm{i} x_n P_n} X \mathrm{e}^{-\mathrm{i} x_{n} P_n} ... \mathrm{e}^{-\mathrm{i} x_1 P_1}`.
