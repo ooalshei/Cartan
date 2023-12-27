@@ -12,10 +12,6 @@ from qiskit import *
 #####################
 
 
-STRING_TO_MATRIX = {'-': [[1, 0], [0, 1]], 'X': [[0, 1], [1, 0]], 'Y': [[0, -1j], [1j, 0]], 'Z': [[1, 0], [0, -1]],
-                    0: [[1, 0], [0, 1]], 1: [[0, 1], [1, 0]], 2: [[0, -1j], [1j, 0]], 3: [[1, 0], [0, -1]]}
-
-
 def gate(circ: QuantumCircuit,
          pauli: str | int,
          index: int) -> None:
