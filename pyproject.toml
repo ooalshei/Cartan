@@ -10,6 +10,7 @@ authors = [
 dependencies = [
     "numpy",
     "scipy",
+    "qiskit",
 ]
 
 [project.optional-dependencies]
