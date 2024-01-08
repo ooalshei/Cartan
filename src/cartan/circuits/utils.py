@@ -79,15 +79,18 @@ def measure(circ: QuantumCircuit, string: str | tuple[int, ...]) -> None:
             circ.measure(i, i)
 
 
-def string_exp_product(generators: list[str | tuple[int, ...]],
+def string_exp_product(circ: QuantumCircuit,
+                       generators: list[str | tuple[int, ...]],
                        angles: list[float],
-                       barrier: bool = False) -> QuantumCircuit:
+                       barrier: bool = False) -> None:
     r"""
-    Generates a circuit for the unitary :math:`\mathrm{e}^{\mathrm{i} x_{1} P_1} ...
+    Generates a gate for the unitary :math:`\mathrm{e}^{\mathrm{i} x_{1} P_1} ...
     \mathrm{e}^{\mathrm{i} x_n P_n}`.
 
     Parameters:
     -----------
+    circ : QuantumCircuit
+        The quantum circuit.
     generators : list[str | tuple[int, ...]]
         The Pauli strings appearing in the exponents.
     angles : list[float]
@@ -108,7 +111,6 @@ def string_exp_product(generators: list[str | tuple[int, ...]],
     reversed_angles = angles[::-1]
     reversed_generators = generators[::-1]
     L = len(reversed_generators[0])
-    circ = QuantumCircuit(L)
 
     for i in range(len(reversed_generators)):
         string = reversed_generators[i][::-1]
@@ -133,7 +135,6 @@ def string_exp_product(generators: list[str | tuple[int, ...]],
         if barrier:
             unit_circ.barrier()
         circ = circ.compose(unit_circ)
-
     return circ
 
 
