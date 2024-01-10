@@ -10,12 +10,12 @@ from qiskit import *
 from .utils import gate, inverse_gate
 
 
-def xy_unitary(circ: QuantumCircuit,
-               number_of_sites: int,
-               angle1: float,
-               angle2: float,
-               index1: int,
-               index2: int) -> None:
+def xy_gate(circ: QuantumCircuit,
+            number_of_sites: int,
+            angle1: float,
+            angle2: float,
+            index1: int,
+            index2: int) -> None:
     r"""
     Generates a gate for the unitary :math:`\mathrm{e}^{\mathrm{i}\theta_{1}XY} \mathrm{e}^{\mathrm{i}\theta_{2}YX}`.
 
@@ -47,12 +47,11 @@ def xy_unitary(circ: QuantumCircuit,
     gate(circ, "Y", i)
 
 
-def k_unitary(circ: QuantumCircuit,
-              number_of_sites: int,
-              angles: list[float]) -> None:
+def k_unitary(number_of_sites: int,
+              angles: list[float]) -> QuantumCircuit:
     r"""
-    Generates the compressed gate for the K unitary of TFIM-like models. This assumes that the k algebra is chosen such
-    that elements are ...--XZZ...Y--.... It takes the form (0,1), (1,2), (2,3), (0,1),
+    Generates the compressed circuit for the K unitary of TFIM-like models. This assumes that the k algebra is chosen
+    such that elements are ...--XZZ...Y--.... It takes the form (0,1), (1,2), (2,3), (0,1),
     (3,4), (1,2) ... (N-2, N-1), (N-4, N-3), (N-6, N-5) ... (3,4), (1,2), (2,3), (0,1), (1,2), (0,1), where (i,j) is
     understood to be :math:`\mathrm{e}^{\mathrm{i}\theta_{1}X_i Y_j} \mathrm{e}^{\mathrm{i}\theta_{2}Y_i X_j}`. Using
     the arrow representation this should look like a cascade where each pair of arrows representing (i,j) should have
@@ -67,14 +66,21 @@ def k_unitary(circ: QuantumCircuit,
     angles : list[float]
         The angles of rotation. The number of angles should be equal to twice the sum over integers from 1 to the
         (number of sites - 1).
+
+    Returns:
+    --------
+    circ : QuantumCircuit
+        The quantum circuit for the unitary.
     """
 
     # Consistency check
     if len(angles) != 2 * sum(i for i in range(number_of_sites)):
         raise Exception(f"Length mismatch. Number of angles should be {2 * sum(i for i in range(number_of_sites))}.")
 
+    circ = QuantumCircuit(number_of_sites)
     angle_index = 0
     for i in range(number_of_sites - 1):
         for j in range(i, -1, -1):
-            xy_unitary(circ, number_of_sites, angles[angle_index], angles[angle_index + 1], j, j + 1)
+            xy_gate(circ, number_of_sites, angles[angle_index], angles[angle_index + 1], j, j + 1)
             angle_index += 2
+    return circ
