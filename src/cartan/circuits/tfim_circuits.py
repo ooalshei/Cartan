@@ -51,10 +51,10 @@ def k_unitary(number_of_sites: int,
               angles: list[float]) -> QuantumCircuit:
     r"""
     Generates the compressed circuit for the K unitary of TFIM-like models. This assumes that the k algebra is chosen
-    such that elements are ...--XZZ...Y--.... It takes the form (0,1), (1,2), (2,3), (0,1),
-    (3,4), (1,2) ... (N-2, N-1), (N-4, N-3), (N-6, N-5) ... (3,4), (1,2), (2,3), (0,1), (1,2), (0,1), where (i,j) is
-    understood to be :math:`\mathrm{e}^{\mathrm{i}\theta_{1}X_i Y_j} \mathrm{e}^{\mathrm{i}\theta_{2}Y_i X_j}`. Using
-    the arrow representation this should look like a cascade where each pair of arrows representing (i,j) should have
+    such that elements are ...--XZZ...Y--.... It takes the form (0,1), (1,2), ..., (N-2, N-1), (0,1), (1,2), ...,
+    (N-3, N-2), ..., (0,1), (1,2), (0,1), where (i,j) is understood to be
+    :math:`\mathrm{e}^{\mathrm{i}\theta_{1}X_i Y_j} \mathrm{e}^{\mathrm{i}\theta_{2}Y_i X_j}`. Using the arrow
+    representation this should look like a cascade where each pair of arrows representing (i,j) should have
     two pairs beneath it and only one pair on top of the circuit (i.e., the last two spins).
 
     Parameters:
