@@ -1,5 +1,5 @@
-from .. import pauli_operations
 from .cartan import CartanDecomposition
+from .. import pauli_operations
 
 
 class InvolutionlessCartan(CartanDecomposition):
@@ -38,10 +38,12 @@ class InvolutionlessCartan(CartanDecomposition):
             initial_index = final_index
             final_index = len(algebra_list) - 1
 
-        sorting_list = [self.N - string.count(0) for string in algebra_list]
         if contradiction:
+            sorting_list = [self.N - string.count(0) for string in algebra_list]
             sorted_algebra_list = [string for _, string in sorted(zip(sorting_list, algebra_list))]
             subalgebra_strings = [sorted_algebra_list[0]]
+            generator_strings = algebra_list.copy()
+            generator_strings.remove(subalgebra_strings[0])
 
             for g in sorted_algebra_list[1:]:
                 for h in subalgebra_strings:
@@ -50,11 +52,14 @@ class InvolutionlessCartan(CartanDecomposition):
                         break
                     elif h == subalgebra_strings[-1]:
                         subalgebra_strings.append(g)
+                        generator_strings.remove(g)
                         break
 
-            return {"DLA": algebra_list, "h": subalgebra_strings, "contradiction": contradiction}
+            return {"DLA": algebra_list, "g": generator_strings, "h": subalgebra_strings,
+                    "contradiction": contradiction}
 
         else:
+            sorting_list = [self.N - string.count(0) for string in m_strings]
             sorted_m_strings = [string for _, string in sorted(zip(sorting_list, m_strings))]
             subalgebra_strings = [sorted_m_strings[0]]
 
