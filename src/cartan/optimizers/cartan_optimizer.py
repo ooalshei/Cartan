@@ -181,14 +181,20 @@ def optimizer(hamiltonian_dict: dict[tuple[int, ...], float],
         transformed_hamiltonian = pauli_operations.exp_conjugation(reversed_strings, reversed_angles,
                                                                    hamiltonian_dict)
 
+        full_norm = 0
+        error_norm = 0
         diagonal_hamiltonian = transformed_hamiltonian.copy()
         for key in transformed_hamiltonian:
             c = True
+            coefficient = abs(transformed_hamiltonian[key]) ** 2
+            full_norm += coefficient
             for string in subalgebra_strings:
                 if not pauli_operations.string_product(key, string)[2]:
                     c = False
             if not c:
+                error_norm += coefficient
                 diagonal_hamiltonian.pop(key)
 
+        print(f"Relative error: {np.sqrt(error_norm / full_norm)}")
         return {"angles": angles, "k": algebra_strings, "H_diagonal": diagonal_hamiltonian,
                 "H_transformed": transformed_hamiltonian}
