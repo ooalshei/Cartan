@@ -1,5 +1,3 @@
-# Python version 3.11.5
-# Created on December 30, 2023
 """
 tfim_circuits
 -------------
@@ -8,11 +6,8 @@ identities that drastically reduce the number of CNOT gates required to build a 
 based on the Cartan decomposition procedure. This module provides circuits based on these simplifications.
 """
 
-############## Imports ##############
 from qiskit import *
 from .utils import gate, inverse_gate
-
-#####################################
 
 
 def xy_unitary(circ: QuantumCircuit,

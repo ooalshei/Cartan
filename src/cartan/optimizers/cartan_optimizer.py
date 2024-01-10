@@ -1,13 +1,6 @@
-# Python version 3.11.5
-# Modified on December 27, 2023
-
-
-########### Imports ###########
 import numpy as np
 import scipy.optimize as opt
 from .. import pauli_operations
-
-###############################
 
 
 def _mut_irr(length: int, seed: float = np.pi) -> list[float]:

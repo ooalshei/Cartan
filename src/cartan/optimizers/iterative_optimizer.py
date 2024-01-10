@@ -1,12 +1,6 @@
-# Python version 3.11.5
-# Created on December 20, 2023
-
-##################### Imports #####################
 import numpy as np
 from ..optimizers.cartan_optimizer import optimizer
 from ..pauli_operations import exp_conjugation
-
-###################################################
 
 
 def iterative_optimizer(hamiltonian_dict: dict[tuple[int, ...], float],

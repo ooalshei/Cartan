@@ -1,15 +1,10 @@
-# Python version 3.11.5
-# Created on December 26, 2023
 """
 utils
 -----
 This module contains useful utility functions commonly used when constructing quantum circuits via qiskit.
 """
 
-###### Imports ######
 from qiskit import *
-
-#####################
 
 
 def gate(circ: QuantumCircuit,

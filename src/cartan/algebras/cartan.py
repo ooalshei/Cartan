@@ -1,18 +1,11 @@
-# Python version 3.11.5
-# Modified on December 20, 2023
-
 """
 Cartan
 ------
 This module contains methods that build Pauli strings given a Hamiltonian, generate the dynamical Lie algebra, and find
 Cartan decompositions. The identity along with the three Pauli matrices are referred to as (0, 1, 2, 3).
 """
-
-########### Imports ###########
 import numpy as np
 from .. import pauli_operations
-
-###############################
 
 
 class Hamiltonian:

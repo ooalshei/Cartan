@@ -1,12 +1,5 @@
-# Python version 3.11.5
-# Modified on December 20, 2023
-
-
-############### Imports ###############
 from .. import pauli_operations
 from .cartan import CartanDecomposition
-
-#######################################
 
 
 class InvolutionlessCartan(CartanDecomposition):
