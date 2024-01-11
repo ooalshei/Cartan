@@ -23,7 +23,7 @@ def product(sigma1: int, sigma2: int) -> int:
 
     Parameters:
     -----------
-    sigma1, sigma2: int
+    sigma1, sigma2 : int
         The two Pauli matrices. The integer can be between 0 and 3.
 
     Returns:
@@ -42,7 +42,7 @@ def signed_product(sigma1: int, sigma2: int) -> tuple[int, complex]:
 
     Parameters:
     -----------
-    sigma1, sigma2: int
+    sigma1, sigma2 : int
         The two Pauli matrices. The integer can be between 0 and 3.
 
     Returns:
@@ -64,14 +64,14 @@ def string_product(
 
     Parameters:
     -----------
-    string1, string2: tuple[int, ...]
+    string1, string2 : tuple[int, ...]
         The two Pauli strings.
 
     Returns:
     --------
-    result: tuple[int, ...]
+    result : tuple[int, ...]
         The product of the two strings.
-    sign: complex
+    sign : complex
         The sign of the product.
     bool
        True if the two strings commute and False otherwise.
@@ -83,8 +83,7 @@ def string_product(
 
     string1_array = np.array(string1)
     string2_array = np.array(string2)
-    sign: complex = np.prod(SIGN_RULES[string1_array,
-                                       string2_array])  # type: ignore
+    sign = np.prod(SIGN_RULES[string1_array, string2_array])
     result: tuple[int, ...] = tuple(
         (string1_array + np.multiply(string2_array, RULES[string1_array])) % 4)
 
@@ -92,17 +91,6 @@ def string_product(
         return result, sign, True
     else:
         return result, sign, False
-
-
-# def mut_irr(n: int, x: float = np.pi) -> list[float]:
-#     """Returns a list of n mutually irrational numbers. Takes the optional argument x irrational to build the set"""
-#     y = x % 1
-#     numbers = [y] * n
-#     for i in range(1, n):
-#         y = (x * y) % 1
-#         numbers[i] = y
-#
-#     return numbers
 
 
 def strings_to_dict(
@@ -115,14 +103,14 @@ def strings_to_dict(
 
     Parameters:
     -----------
-    strings: list[tuple[int, ...]] | tuple[int, ...]:
+    strings : list[tuple[int, ...]] or tuple[int, ...]
         Can take one Pauli string or a list of Pauli strings.
-    coefficients: list[complex] or complex:
+    coefficients : list[complex] or complex
         Can take one coefficient or a list of coefficients.
 
     Returns:
     --------
-    dict[tuple[int, ...], complex]:
+    dict[tuple[int, ...], complex]
         The Pauli sentence as a dictionary.
     """
     # Data reformatting
@@ -148,9 +136,9 @@ def print_letters(sentence: dict[tuple[int, ...], complex] = None,
 
     Parameters:
     -----------
-    sentence: dict[tuple[int, ...], complex], optional
+    sentence : dict[tuple[int, ...], complex], optional
         The Pauli sentence as a dictionary with tuples of integers representing the Pauli strings.
-    string_list: list[tuple[int, ...]], optional
+    string_list : list[tuple[int, ...]], optional
         A list of Pauli strings with tuples of integers representing the Pauli strings.
     file : str, optional
         The file to print the Pauli strings to.
@@ -162,7 +150,7 @@ def print_letters(sentence: dict[tuple[int, ...], complex] = None,
             for pauli in key:
                 string += NUMBERS_TO_LETTERS[pauli]
             letter_dict[string] = sentence[key]
-        print(letter_dict)
+        print(letter_dict, file=file)
 
     elif string_list:
         letter_list = []
@@ -171,7 +159,7 @@ def print_letters(sentence: dict[tuple[int, ...], complex] = None,
             for pauli in item:
                 string += NUMBERS_TO_LETTERS[pauli]
             letter_list.append(string)
-        print(letter_list)
+        print(letter_list, file=file)
 
 
 def full_sum(sentence1: dict[tuple[int, ...], complex],
@@ -182,14 +170,14 @@ def full_sum(sentence1: dict[tuple[int, ...], complex],
 
     Parameters:
     -----------
-    sentence1, sentence2: dict[tuple[int, ...], complex]
+    sentence1, sentence2 : dict[tuple[int, ...], complex]
         The two Pauli sentences.
-    tol: float, default=0
+    tol : float, default=0
         Tolerance. Non-negative number. Any value less than or equal to the tolerance is considered 0.
 
     Returns:
     --------
-    result: dict[tuple[int, ...], complex]
+    result : dict[tuple[int, ...], complex]
         The sum of the two Pauli sentences as a dictionary.
     """
     result = sentence1.copy()
@@ -209,14 +197,14 @@ def full_product(sentence1: dict[tuple[int, ...], complex],
 
     Parameters:
     -----------
-    sentence1, sentence2: dict[tuple[int, ...], complex]
+    sentence1, sentence2 : dict[tuple[int, ...], complex]
         The two Pauli sentences.
-    tol: float, default=0
+    tol : float, default=0
         Tolerance. Non-negative number. Any value less than or equal to the tolerance is considered 0.
 
     Returns:
     --------
-    result: dict[tuple[int, ...], complex]
+    result : dict[tuple[int, ...], complex]
         The product of the two Pauli sentences as a dictionary.
     """
     result: dict[tuple[int, ...], complex] = {}
@@ -238,19 +226,19 @@ def string_exp(string: tuple[int, ...],
 
     Parameters:
     -----------
-    string: tuple[int, ...]
+    string : tuple[int, ...]
         The Pauli string to be exponentiated.
-    angle: float
+    angle : float
         The angle of rotation.
 
     Returns:
     --------
-    result: dict[tuple[int, ...], complex]
+    result : dict[tuple[int, ...], complex]
         The resulting Pauli sentence as a dictionary.
     """
     result = {}
     if np.cos(angle) != 0:
-        result[(0, ) * len(string)] = np.cos(angle)
+        result[(0,) * len(string)] = np.cos(angle)
     if np.sin(angle) != 0:
         result[string] = 1j * np.sin(angle)
     return result
@@ -266,18 +254,18 @@ def exp_conjugation(generators: list[tuple[int, ...]] | tuple[int, ...],
     
     Parameters:
     -----------
-    generators: list[tuple[int, ...]] | tuple[int, ...]
+    generators : list[tuple[int, ...]] or tuple[int, ...]
         Can take a one Pauli string or a list of Pauli strings to be exponentiated.
-    angles: list[float] | float
+    angles : list[float] or float
         Can take one angle or a list of angles.
-    sentence: dict[tuple[int, ...], complex]
+    sentence : dict[tuple[int, ...], complex]
         The Pauli sentence to be conjugated.
-    tol: float, default=0
+    tol : float, default=0
         Tolerance. Non-negative number. Any value less than or equal to the tolerance is considered 0.
 
     Returns:
     --------
-    result: dict[tuple[int, ...], complex]
+    result : dict[tuple[int, ...], complex]
         The resulting Pauli sentence as a dictionary.
     """
     # Data reformatting
@@ -326,13 +314,13 @@ def trace(sentence: dict[tuple[int, ...], complex]) -> float | complex:
     
     Parameters:
     -----------
-    sentence: dict[tuple[int, ...], complex]
+    sentence : dict[tuple[int, ...], complex]
         The Pauli sentence.
 
     Returns:
     --------
-    float | complex
+    float or complex
         The trace of the Pauli sentence divided by the length of a Pauli string.
     """
-    identity = (0, ) * len(next(iter(sentence)))
+    identity = (0,) * len(next(iter(sentence)))
     return sentence.get(identity, 0)
