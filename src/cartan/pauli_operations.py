@@ -141,7 +141,8 @@ def strings_to_dict(
 
 
 def print_letters(sentence: dict[tuple[int, ...], complex] = None,
-                  string_list: list[tuple[int, ...]] = None) -> None:
+                  string_list: list[tuple[int, ...]] = None,
+                  file: str | None = None) -> None:
     """
     Prints the Pauli sentence with strings represented as (-, X, Y, Z). Must specify one and only one keyword.
 
@@ -151,7 +152,8 @@ def print_letters(sentence: dict[tuple[int, ...], complex] = None,
         The Pauli sentence as a dictionary with tuples of integers representing the Pauli strings.
     string_list: list[tuple[int, ...]], optional
         A list of Pauli strings with tuples of integers representing the Pauli strings.
-
+    file : str, optional
+        The file to print the Pauli strings to.
     """
     if sentence:
         letter_dict = {}
