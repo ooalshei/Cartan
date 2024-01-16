@@ -9,7 +9,7 @@ import numpy as np
 import scipy.linalg as la
 from numpy.typing import NDArray
 
-STRING_TO_MATRIX = {'I': [[1, 0], [0, 1]], 'X': [[0, 1], [1, 0]], 'Y': [[0, -1j], [1j, 0]], 'Z': [[1, 0], [0, -1]],
+STRING_TO_MATRIX = {'-': [[1, 0], [0, 1]], 'X': [[0, 1], [1, 0]], 'Y': [[0, -1j], [1j, 0]], 'Z': [[1, 0], [0, -1]],
                     0: [[1, 0], [0, 1]], 1: [[0, 1], [1, 0]], 2: [[0, -1j], [1j, 0]], 3: [[1, 0], [0, -1]]}
 
 
