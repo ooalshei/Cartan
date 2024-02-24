@@ -7,6 +7,7 @@ based on the Cartan decomposition procedure. This module provides circuits based
 """
 
 from qiskit import *
+
 from .utils import gate, inverse_gate
 
 
@@ -59,8 +60,6 @@ def k_unitary(number_of_sites: int,
 
     Parameters:
     -----------
-    circ : QuantumCircuit
-        The quantum circuit.
     number_of_sites : int
         The number of sites of the spin model.
     angles : list[float]
@@ -83,4 +82,39 @@ def k_unitary(number_of_sites: int,
         for j in range(i, -1, -1):
             xy_gate(circ, number_of_sites, angles[angle_index], angles[angle_index + 1], j, j + 1)
             angle_index += 2
+    return circ
+
+
+def iterative_k_unitary(number_of_sites: int,
+                        index: int,
+                        angles: list[float]) -> QuantumCircuit:
+    r"""
+    Generates the compressed circuit for the K unitary of TFIM-like models that shows up in the iterative Cartan
+    decomposition. This assumes that the Cartan subalgebra chosen is ...---Z, ...--Z-, ..., Z---... in this order. For
+    the TFIM case, the symmetric k subspace of the last element Z---... is an empty set.
+
+    Parameters:
+    -----------
+    number_of_sites : int
+        The number of sites of the spin model.
+    index : int
+        The index i of the Pauli string. Z appears at the (N - i)th position.
+    angles : list[float]
+        The angles of rotation. The number of angles should be equal to :math:`2 (N - i - 1)`.
+
+    Returns:
+    --------
+    circ : QuantumCircuit
+        The quantum circuit for the unitary.
+    """
+
+    # Consistency check
+    if len(angles) != 2 * (number_of_sites - index - 1):
+        raise Exception(f"Length mismatch. Number of angles should be {2 * (number_of_sites - index - 1)}.")
+
+    circ = QuantumCircuit(number_of_sites)
+    angle_index = 0
+    for i in range(number_of_sites - index - 2, -1, -1):
+        xy_gate(circ, number_of_sites, angles[angle_index], angles[angle_index + 1], i, i + 1)
+        angle_index += 2
     return circ
