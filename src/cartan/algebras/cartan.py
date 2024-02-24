@@ -54,30 +54,31 @@ class Hamiltonian:
         if self.model == 'TFIM':
             string_list = []
             coefficient_list = []
-            x = [1] * self.N if parameters is None else parameters
+            coefficients = [1, 1] if parameters is None else parameters
 
             for i in range(self.N - 1):
                 string = [0] * self.N
                 string[i] = 1
                 string[i + 1] = 1
                 string_list.append(tuple(string))
-                coefficient_list.append(-1)
+                coefficient_list.append(-coefficients[0])
 
                 string = [0] * self.N
                 string[i] = 3
                 string_list.append(tuple(string))
-                coefficient_list.append(x[i])
+                coefficient_list.append(-coefficients[0] * coefficients[1])
 
             string = [0] * self.N
             string[self.N - 1] = 3
             string_list.append(tuple(string))
-            coefficient_list.append(x[-1])
+            coefficient_list.append(-coefficients[0] * coefficients[1])
 
             return string_list, coefficient_list
 
         elif self.model == 'XY':
             string_list = []
-            coefficient_list = [-1] * 2 * (self.N - 1) if parameters is None else parameters
+            coefficients = -1 if parameters is None else -parameters[0]
+            coefficient_list = [coefficients] * 2 * (self.N - 1)
 
             for i in range(self.N - 1):
                 string = [0] * self.N
@@ -95,30 +96,30 @@ class Hamiltonian:
         elif self.model == 'TFXY':
             string_list = []
             coefficient_list = []
-            x = [1] * self.N if parameters is None else parameters
+            coefficients = [1, 1] if parameters is None else parameters
 
             for i in range(self.N - 1):
                 string = [0] * self.N
                 string[i] = 1
                 string[i + 1] = 1
                 string_list.append(tuple(string))
-                coefficient_list.append(-1)
+                coefficient_list.append(-coefficients[0])
 
                 string = [0] * self.N
                 string[i] = 2
                 string[i + 1] = 2
                 string_list.append(tuple(string))
-                coefficient_list.append(-1)
+                coefficient_list.append(-coefficients[0])
 
                 string = [0] * self.N
                 string[i] = 3
                 string_list.append(tuple(string))
-                coefficient_list.append(x[i])
+                coefficient_list.append(-coefficients[0] * coefficients[1])
 
             string = [0] * self.N
             string[self.N - 1] = 3
             string_list.append(tuple(string))
-            coefficient_list.append(x[-1])
+            coefficient_list.append(-coefficients[0] * coefficients[1])
 
             return string_list, coefficient_list
 
@@ -153,7 +154,8 @@ class Hamiltonian:
 
         elif self.model == 'Heisenberg':
             string_list = []
-            coefficient_list = [-1] * 3 * (self.N - 1) if parameters is None else parameters
+            coefficients = -1 if parameters is None else -parameters[0]
+            coefficient_list = [coefficients] * 3 * (self.N - 1)
 
             for i in range(self.N - 1):
                 string = [0] * self.N
@@ -176,40 +178,40 @@ class Hamiltonian:
         elif self.model == 'CFXY':
             string_list = []
             coefficient_list = []
-            x = [(1, 1)] * self.N if parameters is None else parameters
+            coefficients = [1, 1, 1] if parameters is None else parameters
 
             for i in range(self.N - 1):
                 string = [0] * self.N
                 string[i] = 1
                 string[i + 1] = 1
                 string_list.append(tuple(string))
-                coefficient_list.append(-1)
+                coefficient_list.append(-coefficients[0])
 
                 string = [0] * self.N
                 string[i] = 2
                 string[i + 1] = 2
                 string_list.append(tuple(string))
-                coefficient_list.append(-1)
+                coefficient_list.append(-coefficients[0])
 
                 string = [0] * self.N
                 string[i] = 3
                 string_list.append(tuple(string))
-                coefficient_list.append(x[i][0])
+                coefficient_list.append(-coefficients[0] * coefficients[1])
 
                 string = [0] * self.N
                 string[i] = 2
                 string_list.append(tuple(string))
-                coefficient_list.append(x[i][1])
+                coefficient_list.append(-coefficients[0] * coefficients[2])
 
             string = [0] * self.N
             string[self.N - 1] = 3
             string_list.append(tuple(string))
-            coefficient_list.append(x[-1][0])
+            coefficient_list.append(-coefficients[0] * coefficients[1])
 
             string = [0] * self.N
             string[self.N - 1] = 2
             string_list.append(tuple(string))
-            coefficient_list.append(x[-1][1])
+            coefficient_list.append(-coefficients[0] * coefficients[2])
 
             return string_list, coefficient_list
 
@@ -230,7 +232,7 @@ class Hamiltonian:
 
             string_list = []
             coefficient_list = []
-            x = [1, 1] if parameters is None else parameters
+            coefficients = [1, 1] if parameters is None else parameters
 
             def double(n):
                 return (self.N - n) * (self.N - n + 1)
@@ -245,13 +247,13 @@ class Hamiltonian:
                 string[i] = 1
                 string[i + 1] = 1
                 string_list.append(tuple(string))
-                coefficient_list.append(x[0])
+                coefficient_list.append(coefficients[0])
 
                 string = [0] * self.N
                 string[i] = 2
                 string[i + 1] = 2
                 string_list.append(tuple(string))
-                coefficient_list.append(x[0])
+                coefficient_list.append(coefficients[0])
 
                 c = 0.25 * double(i)
                 for j in range(i):
@@ -261,7 +263,7 @@ class Hamiltonian:
                     string_list.append(tuple(string))
                     coefficient_list.append(c)
 
-                c = 0.25 * single(i) + (-1) ** (i - 1) * x[1] / 2
+                c = 0.25 * single(i) + (-1) ** (i - 1) * coefficients[1] / 2
                 string = [0] * self.N
                 string[i] = 3
                 string_list.append(tuple(string))
@@ -269,7 +271,7 @@ class Hamiltonian:
 
             string = [0] * self.N
             string[self.N - 1] = 3
-            c = (-1) ** (self.N - 1) * x[1] / 2
+            c = (-1) ** (self.N - 1) * coefficients[1] / 2
             string_list.append(tuple(string))
             coefficient_list.append(c)
 
@@ -279,44 +281,44 @@ class Hamiltonian:
 
             string_list = []
             coefficient_list = []
-            parameters = [1, np.pi / 4] if parameters is None else parameters.copy()
+            coefficients = [1, np.pi / 4] if parameters is None else parameters
 
             for i in range(self.N - 1):
                 string = [0] * self.N
                 string[i] = 1
                 string[i + 1] = 1
                 string_list.append(tuple(string))
-                coefficient_list.append(-parameters[0] / 2)
+                coefficient_list.append(-coefficients[0] / 2)
 
                 string = [0] * self.N
                 string[i] = 2
                 string[i + 1] = 2
                 string_list.append(tuple(string))
-                coefficient_list.append(-parameters[0] / 2)
+                coefficient_list.append(-coefficients[0] / 2)
 
             string = [3] * self.N
             string[0] = 1
             string[-1] = 1
             string_list.append(tuple(string))
-            coefficient_list.append(-parameters[0] * np.cos(parameters[1]) / 2)
+            coefficient_list.append(-coefficients[0] * np.cos(coefficients[1]) / 2)
 
             string = [3] * self.N
             string[0] = 2
             string[-1] = 2
             string_list.append(tuple(string))
-            coefficient_list.append(-parameters[0] * np.cos(parameters[1]) / 2)
+            coefficient_list.append(-coefficients[0] * np.cos(coefficients[1]) / 2)
 
             string = [3] * self.N
             string[0] = 1
             string[-1] = 2
             string_list.append(tuple(string))
-            coefficient_list.append(-parameters[0] * np.sin(parameters[1]) / 2)
+            coefficient_list.append(-coefficients[0] * np.sin(coefficients[1]) / 2)
 
             string = [3] * self.N
             string[0] = 2
             string[-1] = 1
             string_list.append(tuple(string))
-            coefficient_list.append(parameters[0] * np.sin(parameters[1]) / 2)
+            coefficient_list.append(coefficients[0] * np.sin(coefficients[1]) / 2)
 
             return string_list, coefficient_list
 
