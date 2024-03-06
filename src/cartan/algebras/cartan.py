@@ -1,10 +1,11 @@
 """
-Cartan
+cartan
 ------
 This module contains methods that build Pauli strings given a Hamiltonian, generate the dynamical Lie algebra, and find
 Cartan decompositions. The identity along with the three Pauli matrices are referred to as (0, 1, 2, 3).
 """
 import numpy as np
+
 from .. import pauli_operations
 
 
@@ -27,11 +28,14 @@ class Hamiltonian:
         Number of sites.
     model: {"TFIM", "XY", "TFXY", "Heisenberg", "CFXY", "UCC", "Schwinger", "fermion_ring"}, optional
         Model name.
+    pbc : bool, default=False
+        Periodic boundary conditions.
     """
 
-    def __init__(self, number_of_sites: int, model: str | None = None) -> None:
+    def __init__(self, number_of_sites: int, model: str | None = None, pbc: bool = False) -> None:
         self.N = number_of_sites
         self.model = model
+        self.pbc = pbc
 
     def builder(self, parameters: list[float | int, ...] | None = None) -> tuple[list[tuple[int, ...]], list[float]]:
         """
@@ -55,71 +59,103 @@ class Hamiltonian:
             string_list = []
             coefficient_list = []
             coefficients = [1, 1] if parameters is None else parameters
+            coefficient_xx = -coefficients[0]
+            coefficient_z = -coefficients[0] * coefficients[1]
 
-            for i in range(self.N - 1):
-                string = [0] * self.N
-                string[i] = 1
-                string[i + 1] = 1
-                string_list.append(tuple(string))
-                coefficient_list.append(-coefficients[0])
+            if coefficient_xx != 0:
+                for i in range(self.N - 1):
+                    string = [0] * self.N
+                    string[i] = 1
+                    string[i + 1] = 1
+                    string_list.append(tuple(string))
+                    coefficient_list.append(coefficient_xx)
+                if self.pbc:
+                    string = [0] * self.N
+                    string[0] = 1
+                    string[-1] = 1
+                    string_list.append(tuple(string))
+                    coefficient_list.append(coefficient_xx)
 
-                string = [0] * self.N
-                string[i] = 3
-                string_list.append(tuple(string))
-                coefficient_list.append(-coefficients[0] * coefficients[1])
-
-            string = [0] * self.N
-            string[self.N - 1] = 3
-            string_list.append(tuple(string))
-            coefficient_list.append(-coefficients[0] * coefficients[1])
-
-            return string_list, coefficient_list
-
-        elif self.model == 'XY':
-            string_list = []
-            coefficients = -1 if parameters is None else -parameters[0]
-            coefficient_list = [coefficients] * 2 * (self.N - 1)
-
-            for i in range(self.N - 1):
-                string = [0] * self.N
-                string[i] = 1
-                string[i + 1] = 1
-                string_list.append(tuple(string))
-
-                string = [0] * self.N
-                string[i] = 2
-                string[i + 1] = 2
-                string_list.append(tuple(string))
+            if coefficient_z != 0:
+                for i in range(self.N):
+                    string = [0] * self.N
+                    string[i] = 3
+                    string_list.append(tuple(string))
+                    coefficient_list.append(coefficient_z)
 
             return string_list, coefficient_list
+
+        # elif self.model == 'XY':
+        #     string_list = []
+        #     coefficients = -1 if parameters is None else -parameters[0]
+        #     coefficient_list = [coefficients] * 2 * (self.N - 1)
+        #
+        #     for i in range(self.N - 1):
+        #         string = [0] * self.N
+        #         string[i] = 1
+        #         string[i + 1] = 1
+        #         string_list.append(tuple(string))
+        #
+        #         string = [0] * self.N
+        #         string[i] = 2
+        #         string[i + 1] = 2
+        #         string_list.append(tuple(string))
+        #
+        #     if self.pbc:
+        #         string = [0] * self.N
+        #         string[0] = 1
+        #         string[-1] = 1
+        #         string_list.append(tuple(string))
+        #         coefficient_list.append(coefficients)
+        #
+        #         string = [0] * self.N
+        #         string[0] = 2
+        #         string[-1] = 2
+        #         string_list.append(tuple(string))
+        #         coefficient_list.append(coefficients)
+        #
+        #     return string_list, coefficient_list
 
         elif self.model == 'TFXY':
             string_list = []
             coefficient_list = []
             coefficients = [1, 1] if parameters is None else parameters
+            coefficient_xy = -coefficients[0]
+            coefficient_z = -coefficients[0] * coefficients[1]
 
-            for i in range(self.N - 1):
-                string = [0] * self.N
-                string[i] = 1
-                string[i + 1] = 1
-                string_list.append(tuple(string))
-                coefficient_list.append(-coefficients[0])
+            if coefficient_xy != 0:
+                for i in range(self.N - 1):
+                    string = [0] * self.N
+                    string[i] = 1
+                    string[i + 1] = 1
+                    string_list.append(tuple(string))
+                    coefficient_list.append(coefficient_xy)
 
-                string = [0] * self.N
-                string[i] = 2
-                string[i + 1] = 2
-                string_list.append(tuple(string))
-                coefficient_list.append(-coefficients[0])
+                    string = [0] * self.N
+                    string[i] = 2
+                    string[i + 1] = 2
+                    string_list.append(tuple(string))
+                    coefficient_list.append(coefficient_xy)
 
-                string = [0] * self.N
-                string[i] = 3
-                string_list.append(tuple(string))
-                coefficient_list.append(-coefficients[0] * coefficients[1])
+                    if self.pbc:
+                        string = [0] * self.N
+                        string[0] = 1
+                        string[-1] = 1
+                        string_list.append(tuple(string))
+                        coefficient_list.append(coefficient_xy)
 
-            string = [0] * self.N
-            string[self.N - 1] = 3
-            string_list.append(tuple(string))
-            coefficient_list.append(-coefficients[0] * coefficients[1])
+                        string = [0] * self.N
+                        string[0] = 2
+                        string[-1] = 2
+                        string_list.append(tuple(string))
+                        coefficient_list.append(coefficient_xy)
+
+            if coefficient_z != 0:
+                for i in range(self.N):
+                    string = [0] * self.N
+                    string[i] = 3
+                    string_list.append(tuple(string))
+                    coefficient_list.append(coefficient_z)
 
             return string_list, coefficient_list
 
@@ -173,45 +209,75 @@ class Hamiltonian:
                 string[i + 1] = 3
                 string_list.append(tuple(string))
 
+            if self.pbc:
+                string = [0] * self.N
+                string[0] = 1
+                string[-1] = 1
+                string_list.append(tuple(string))
+                coefficient_list.append(coefficients)
+
+                string = [0] * self.N
+                string[0] = 2
+                string[-1] = 2
+                string_list.append(tuple(string))
+                coefficient_list.append(coefficients)
+
+                string = [0] * self.N
+                string[0] = 3
+                string[-1] = 3
+                string_list.append(tuple(string))
+                coefficient_list.append(coefficients)
+
             return string_list, coefficient_list
 
         elif self.model == 'CFXY':
             string_list = []
             coefficient_list = []
             coefficients = [1, 1, 1] if parameters is None else parameters
+            coefficient_xy = -coefficients[0]
+            coefficient_z = -coefficients[0] * coefficients[1]
+            coefficient_y = -coefficients[0] * coefficients[2]
 
-            for i in range(self.N - 1):
-                string = [0] * self.N
-                string[i] = 1
-                string[i + 1] = 1
-                string_list.append(tuple(string))
-                coefficient_list.append(-coefficients[0])
+            if coefficient_xy != 0:
+                for i in range(self.N - 1):
+                    string = [0] * self.N
+                    string[i] = 1
+                    string[i + 1] = 1
+                    string_list.append(tuple(string))
+                    coefficient_list.append(coefficient_xy)
 
-                string = [0] * self.N
-                string[i] = 2
-                string[i + 1] = 2
-                string_list.append(tuple(string))
-                coefficient_list.append(-coefficients[0])
+                    string = [0] * self.N
+                    string[i] = 2
+                    string[i + 1] = 2
+                    string_list.append(tuple(string))
+                    coefficient_list.append(coefficient_xy)
 
-                string = [0] * self.N
-                string[i] = 3
-                string_list.append(tuple(string))
-                coefficient_list.append(-coefficients[0] * coefficients[1])
+                    if self.pbc:
+                        string = [0] * self.N
+                        string[0] = 1
+                        string[-1] = 1
+                        string_list.append(tuple(string))
+                        coefficient_list.append(coefficient_xy)
 
-                string = [0] * self.N
-                string[i] = 2
-                string_list.append(tuple(string))
-                coefficient_list.append(-coefficients[0] * coefficients[2])
+                        string = [0] * self.N
+                        string[0] = 2
+                        string[-1] = 2
+                        string_list.append(tuple(string))
+                        coefficient_list.append(coefficient_xy)
 
-            string = [0] * self.N
-            string[self.N - 1] = 3
-            string_list.append(tuple(string))
-            coefficient_list.append(-coefficients[0] * coefficients[1])
+            if coefficient_z != 0:
+                for i in range(self.N):
+                    string = [0] * self.N
+                    string[i] = 3
+                    string_list.append(tuple(string))
+                    coefficient_list.append(coefficient_z)
 
-            string = [0] * self.N
-            string[self.N - 1] = 2
-            string_list.append(tuple(string))
-            coefficient_list.append(-coefficients[0] * coefficients[2])
+            if coefficient_y != 0:
+                for i in range(self.N):
+                    string = [0] * self.N
+                    string[i] = 2
+                    string_list.append(tuple(string))
+                    coefficient_list.append(coefficient_y)
 
             return string_list, coefficient_list
 
@@ -385,8 +451,8 @@ class CartanDecomposition(Hamiltonian):
         Model name.
     """
 
-    def __init__(self, number_of_sites: int, model: str | None = None) -> None:
-        super().__init__(number_of_sites, model)
+    def __init__(self, number_of_sites: int, model: str | None = None, pbc: bool = False) -> None:
+        super().__init__(number_of_sites, model, pbc)
 
     def decomposition(self, algebra_list: list[tuple[int, ...]] | None = None, involution: str = "even_odd") -> tuple[
         list[tuple[int, ...]], list[tuple[int, ...]], list[tuple[int, ...]]]:

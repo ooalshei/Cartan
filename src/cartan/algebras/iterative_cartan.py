@@ -1,11 +1,11 @@
-from .. import pauli_operations
 from . import InvolutionlessCartan
+from .. import pauli_operations
 
 
 class IterativeCartan(InvolutionlessCartan):
 
-    def __init__(self, number_of_sites, model):
-        super().__init__(number_of_sites, model)
+    def __init__(self, number_of_sites, model, pbc=False):
+        super().__init__(number_of_sites, model, pbc)
 
     def abelian_subalgebra(self, subalgebra=None):
 

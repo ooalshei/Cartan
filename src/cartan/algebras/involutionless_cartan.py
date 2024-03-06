@@ -4,8 +4,8 @@ from .. import pauli_operations
 
 class InvolutionlessCartan(CartanDecomposition):
 
-    def __init__(self, number_of_sites, model):
-        super().__init__(number_of_sites, model)
+    def __init__(self, number_of_sites, model, pbc=False):
+        super().__init__(number_of_sites, model, pbc)
 
     def decomposition(self, hamiltonian_list=None, involution=None):
 
