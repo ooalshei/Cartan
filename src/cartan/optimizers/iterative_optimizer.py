@@ -1,4 +1,5 @@
 import numpy as np
+
 from ..optimizers.cartan_optimizer import optimizer
 from ..pauli_operations import exp_conjugation
 
@@ -12,8 +13,7 @@ def iterative_optimizer(hamiltonian_dict: dict[tuple[int, ...], float],
                         iterations: float = None,
                         coefficient_tol: float = 1e-6
                         ) -> tuple[list[list[float]], list[list[tuple[int, ...]]], dict[tuple[int, ...], complex],
-                             dict[tuple[int, ...], complex]]:
-
+dict[tuple[int, ...], complex]]:
     if initial_angles is None:
         angles = []
         for subspace in subspace_strings:
@@ -24,17 +24,19 @@ def iterative_optimizer(hamiltonian_dict: dict[tuple[int, ...], float],
     transformed_hamiltonian = hamiltonian_dict.copy()
 
     for i in range(len(abelian_strings)):
-        angles[i], subspace, diagonal_hamiltonian, _ = optimizer(diagonal_hamiltonian,
-                                                                 subspace_strings[i],
-                                                                 [abelian_strings[i]],
-                                                                 angles[i],  # type: ignore
-                                                                 method=method,
-                                                                 tol=tol,
-                                                                 iterations=iterations,
-                                                                 coefficient_tol=coefficient_tol
-                                                                 )
+        result = optimizer(diagonal_hamiltonian,
+                           subspace_strings[i],
+                           [abelian_strings[i]],
+                           angles[i],  # type: ignore
+                           method=method,
+                           tol=tol,
+                           iterations=iterations,
+                           coefficient_tol=coefficient_tol
+                           )
 
+        angles[i] = result["angles"]
         reversed_angles = np.flip(-angles[i])
-        reversed_subspace = subspace[::-1]
+        reversed_subspace = result["k"][::-1]
+        diagonal_hamiltonian = result["H_diagonal"]
         transformed_hamiltonian = exp_conjugation(reversed_subspace, reversed_angles, transformed_hamiltonian)
     return angles, subspace_strings, diagonal_hamiltonian, transformed_hamiltonian
