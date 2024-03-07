@@ -26,7 +26,7 @@ class Hamiltonian:
     -----------
     number_of_sites: int
         Number of sites.
-    model: {"TFIM", "XY", "TFXY", "Heisenberg", "CFXY", "UCC", "Schwinger", "fermion_ring"}, optional
+    model: {"TFIM", "TFXY", "Heisenberg", "CFXY", "UCC", "Schwinger", "fermion_ring", "Creutz"}, optional
         Model name.
     pbc : bool, default=False
         Periodic boundary conditions.
@@ -388,6 +388,182 @@ class Hamiltonian:
 
             return string_list, coefficient_list
 
+        elif self.model == "Creutz":
+            string_list = []
+            coefficient_list = []
+            coefficients = [1, 1, 1, np.pi / 4] if parameters is None else parameters
+            t_cos = -coefficients[0] / 2 * np.cos(coefficients[3])
+            t_sin = -coefficients[0] / 2 * np.sin(coefficients[3])
+            t_d = -coefficients[1] / 2
+            t_v = -coefficients[2] / 2
+
+            if np.abs(t_cos) >= 1e-10:
+                for i in range(2 * self.N - 2):
+                    string = [0] * 2 * self.N
+                    string[i] = 1
+                    string[i + 1] = 3
+                    string[i + 2] = 1
+                    string_list.append(tuple(string))
+                    coefficient_list.append(t_cos)
+
+                    string = [0] * 2 * self.N
+                    string[i] = 2
+                    string[i + 1] = 3
+                    string[i + 2] = 2
+                    string_list.append(tuple(string))
+                    coefficient_list.append(t_cos)
+
+                if self.pbc:
+                    string = [3] * 2 * self.N
+                    string[0] = 1
+                    string[-2] = 1
+                    string[-1] = 0
+                    string_list.append(tuple(string))
+                    coefficient_list.append(t_cos)
+
+                    string = [3] * 2 * self.N
+                    string[0] = 2
+                    string[-2] = 2
+                    string[-1] = 0
+                    string_list.append(tuple(string))
+                    coefficient_list.append(t_cos)
+
+                    string = [3] * 2 * self.N
+                    string[0] = 0
+                    string[1] = 1
+                    string[-1] = 1
+                    string_list.append(tuple(string))
+                    coefficient_list.append(t_cos)
+
+                    string = [3] * 2 * self.N
+                    string[0] = 0
+                    string[1] = 2
+                    string[-1] = 2
+                    string_list.append(tuple(string))
+                    coefficient_list.append(t_cos)
+
+            if np.abs(t_sin) >= 1e-10:
+                for i in range(2 * self.N - 2):
+                    string = [0] * 2 * self.N
+                    string[i] = 1
+                    string[i + 1] = 3
+                    string[i + 2] = 2
+                    string_list.append(tuple(string))
+                    coefficient_list.append((-1) ** i * t_sin)
+
+                    string = [0] * 2 * self.N
+                    string[i] = 2
+                    string[i + 1] = 3
+                    string[i + 2] = 1
+                    string_list.append(tuple(string))
+                    coefficient_list.append(-(-1) ** i * t_sin)
+
+                if self.pbc:
+                    string = [3] * 2 * self.N
+                    string[0] = 1
+                    string[-2] = 2
+                    string[-1] = 0
+                    string_list.append(tuple(string))
+                    coefficient_list.append(-t_sin)
+
+                    string = [3] * 2 * self.N
+                    string[0] = 2
+                    string[-2] = 1
+                    string[-1] = 0
+                    string_list.append(tuple(string))
+                    coefficient_list.append(t_sin)
+
+                    string = [3] * 2 * self.N
+                    string[0] = 0
+                    string[1] = 1
+                    string[-1] = 2
+                    string_list.append(tuple(string))
+                    coefficient_list.append(t_sin)
+
+                    string = [3] * 2 * self.N
+                    string[0] = 0
+                    string[1] = 2
+                    string[-1] = 1
+                    string_list.append(tuple(string))
+                    coefficient_list.append(-t_sin)
+
+            if t_d != 0:
+                for i in range(2 * self.N - 2):
+                    if i % 2 == 0:
+                        string = [0] * 2 * self.N
+                        string[i] = 1
+                        string[i + 1] = 3
+                        string[i + 2] = 3
+                        string[i + 3] = 1
+                        string_list.append(tuple(string))
+                        coefficient_list.append(t_d)
+
+                        string = [0] * 2 * self.N
+                        string[i] = 2
+                        string[i + 1] = 3
+                        string[i + 2] = 3
+                        string[i + 3] = 2
+                        string_list.append(tuple(string))
+                        coefficient_list.append(t_d)
+
+                    else:
+                        string = [0] * 2 * self.N
+                        string[i] = 1
+                        string[i + 1] = 1
+                        string_list.append(tuple(string))
+                        coefficient_list.append(t_d)
+
+                        string = [0] * 2 * self.N
+                        string[i] = 2
+                        string[i + 1] = 2
+                        string_list.append(tuple(string))
+                        coefficient_list.append(t_d)
+
+                if self.pbc:
+                    string = [3] * 2 * self.N
+                    string[0] = 1
+                    string[-1] = 1
+                    string_list.append(tuple(string))
+                    coefficient_list.append(t_d)
+
+                    string = [3] * 2 * self.N
+                    string[0] = 2
+                    string[-1] = 2
+                    string_list.append(tuple(string))
+                    coefficient_list.append(t_d)
+
+                    string = [3] * 2 * self.N
+                    string[0] = 0
+                    string[1] = 1
+                    string[-2] = 1
+                    string[-1] = 0
+                    string_list.append(tuple(string))
+                    coefficient_list.append(t_d)
+
+                    string = [3] * 2 * self.N
+                    string[0] = 0
+                    string[1] = 2
+                    string[-2] = 2
+                    string[-1] = 0
+                    string_list.append(tuple(string))
+                    coefficient_list.append(t_d)
+
+            if t_v != 0:
+                for i in range(0, 2 * self.N - 1, 2):
+                    string = [0] * 2 * self.N
+                    string[i] = 1
+                    string[i + 1] = 1
+                    string_list.append(tuple(string))
+                    coefficient_list.append(t_v)
+
+                    string = [0] * 2 * self.N
+                    string[i] = 2
+                    string[i + 1] = 2
+                    string_list.append(tuple(string))
+                    coefficient_list.append(t_v)
+
+            return string_list, coefficient_list
+
         else:
             return []  # type: ignore
 
@@ -449,6 +625,7 @@ class CartanDecomposition(Hamiltonian):
         Number of sites.
     model: {"TFIM", "XY", "TFXY", "Heisenberg", "CFXY", "UCC", "Schwinger", "fermion_ring"}, optional
         Model name.
+    pbc : bool, default=False
     """
 
     def __init__(self, number_of_sites: int, model: str | None = None, pbc: bool = False) -> None:
