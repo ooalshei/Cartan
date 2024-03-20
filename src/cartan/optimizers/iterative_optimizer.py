@@ -12,8 +12,8 @@ def iterative_optimizer(hamiltonian_dict: dict[tuple[int, ...], float],
                         tol: float = 1e-6,
                         iterations: float = None,
                         coefficient_tol: float = 1e-6
-                        ) -> tuple[list[list[float]], list[list[tuple[int, ...]]], dict[tuple[int, ...], complex],
-dict[tuple[int, ...], complex]]:
+                        ) -> dict[str, list[float | tuple[int, ...]] |
+                                       dict[tuple[int, ...], float]]:
     if initial_angles is None:
         angles = []
         for subspace in subspace_strings:
@@ -23,6 +23,7 @@ dict[tuple[int, ...], complex]]:
     diagonal_hamiltonian = hamiltonian_dict.copy()
     transformed_hamiltonian = hamiltonian_dict.copy()
 
+    calls = 0
     for i in range(len(abelian_strings)):
         result = optimizer(diagonal_hamiltonian,
                            subspace_strings[i],
@@ -38,5 +39,10 @@ dict[tuple[int, ...], complex]]:
         reversed_angles = np.flip(-angles[i])
         reversed_subspace = result["k"][::-1]
         diagonal_hamiltonian = result["H_diagonal"]
+        calls += result["calls"]
+        relative_error = result["rel_error"]
+        iteration = result["iterations"]
         transformed_hamiltonian = exp_conjugation(reversed_subspace, reversed_angles, transformed_hamiltonian)
-    return angles, subspace_strings, diagonal_hamiltonian, transformed_hamiltonian
+    return {"angles": angles, "k": subspace_strings, "H_diagonal": diagonal_hamiltonian,
+            "H_transformed": transformed_hamiltonian, "rel_error": relative_error,
+            "iterations": iteration, "calls": calls}

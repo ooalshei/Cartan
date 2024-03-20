@@ -68,6 +68,7 @@ def optimizer(hamiltonian_dict: dict[tuple[int, ...], float],
               initial_angles: list[float] | None = None,
               method: str = "BFGS",
               tol: float = 1e-6,
+              tol_type: str = "rel",
               iterations: float = None,
               coefficient_tol: float = 0) -> dict[str, list[float | tuple[int, ...]] |
                                                        dict[tuple[int, ...], float]]:
@@ -104,7 +105,6 @@ def optimizer(hamiltonian_dict: dict[tuple[int, ...], float],
     transformed_hamiltonian : dict[tuple[int, ...], float]
         The full transformed Hamiltonian. Use key "H_transformed".
     """
-
     angles = np.pi * np.random.rand(len(algebra_strings)) if initial_angles is None else initial_angles.copy()
     numbers = _mut_irr(len(subalgebra_strings))
     h_element = dict(zip(subalgebra_strings, numbers))
@@ -116,6 +116,7 @@ def optimizer(hamiltonian_dict: dict[tuple[int, ...], float],
 
         theta_points = np.linspace(0, np.pi / 2, 3)
         iteration = 0
+        cost_calls = 0
 
         while True:
             generators_to_append = []
@@ -139,6 +140,7 @@ def optimizer(hamiltonian_dict: dict[tuple[int, ...], float],
                                                 coefficient_tol)
                 cost_function3 = _cost_function(angles3[:i + 1], generators_to_append, existing_dict, hamiltonian_dict,
                                                 coefficient_tol)
+                cost_calls += 3
 
                 fit_coefficients = opt.curve_fit(harmonic, theta_points,
                                                  [cost_function1, cost_function2, cost_function3])[0]
@@ -152,27 +154,31 @@ def optimizer(hamiltonian_dict: dict[tuple[int, ...], float],
                                                                        hamiltonian_dict,
                                                                        coefficient_tol)
 
-            full_norm = 0
-            error_norm = 0
-            diagonal_hamiltonian = transformed_hamiltonian.copy()
-            for key in transformed_hamiltonian:
-                c = True
-                coefficient = abs(transformed_hamiltonian[key]) ** 2
-                full_norm += coefficient
-                for string in subalgebra_strings:
-                    if not pauli_operations.string_product(key, string)[2]:
-                        c = False
-                if not c:
-                    error_norm += coefficient
-                    diagonal_hamiltonian.pop(key)
+            if tol_type == "rel":
+                full_norm = 0
+                error_norm = 0
+                diagonal_hamiltonian = transformed_hamiltonian.copy()
+                for key in transformed_hamiltonian:
+                    c = True
+                    coefficient = abs(transformed_hamiltonian[key]) ** 2
+                    full_norm += coefficient
+                    for string in subalgebra_strings:
+                        if not pauli_operations.string_product(key, string)[2]:
+                            c = False
+                    if not c:
+                        error_norm += coefficient
+                        diagonal_hamiltonian.pop(key)
 
-            if iteration % 50 == 0:
-                print(f"Iteration {iteration}. Relative error: {np.sqrt(error_norm / full_norm)}")
+                if iteration % 50 == 0:
+                    print(f"Iteration {iteration}. Relative error: {np.sqrt(error_norm / full_norm)}")
+                    print(f"Cost function calls: {cost_calls}")
 
-            if np.sqrt(error_norm / full_norm) <= tol or iteration == iterations:
-                print(f"Total iterations: {iteration}. Relative error: {np.sqrt(error_norm / full_norm)}")
-                return {"angles": angles, "k": algebra_strings, "H_diagonal": diagonal_hamiltonian,
-                        "H_transformed": transformed_hamiltonian}
+                if np.sqrt(error_norm / full_norm) <= tol or iteration == iterations:
+                    print(f"Total iterations: {iteration}. Relative error: {np.sqrt(error_norm / full_norm)}")
+                    print(f"Total cost function calls: {cost_calls}")
+                    return {"angles": angles, "k": algebra_strings, "H_diagonal": diagonal_hamiltonian,
+                            "H_transformed": transformed_hamiltonian, "rel_error": np.sqrt(error_norm / full_norm),
+                            "iterations": iteration, "calls": cost_calls}
 
     else:
         def f(x):
