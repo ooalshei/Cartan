@@ -54,9 +54,12 @@ def _cost_function(angles: list[float],
     float
         The cost function.
     """
-    sentence1 = pauli_operations.exp_conjugation(algebra_strings, angles, subalgebra_element, tol)
-    sentence2 = pauli_operations.full_product(sentence1, hamiltonian_dict, tol)
-    return np.real(pauli_operations.trace(sentence2))
+    sentence = pauli_operations.exp_conjugation(algebra_strings, angles, subalgebra_element, tol)
+    cost = 0
+    for key in hamiltonian_dict.keys():
+        if key in sentence.keys():
+            cost += hamiltonian_dict[key] * sentence[key]
+    return np.real(cost)
 
 
 def optimizer(hamiltonian_dict: dict[tuple[int, ...], float],
