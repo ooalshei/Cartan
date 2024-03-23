@@ -105,7 +105,7 @@ def optimizer(hamiltonian_dict: dict[tuple[int, ...], float],
     transformed_hamiltonian : dict[tuple[int, ...], float]
         The full transformed Hamiltonian. Use key "H_transformed".
     """
-    angles = np.pi * np.random.rand(len(algebra_strings)) if initial_angles is None else initial_angles.copy()
+    angles = np.pi * np.random.rand(len(algebra_strings)) if initial_angles is None else initial_angles[::-1].copy()
     numbers = _mut_irr(len(subalgebra_strings))
     h_element = dict(zip(subalgebra_strings, numbers))
 
@@ -117,13 +117,15 @@ def optimizer(hamiltonian_dict: dict[tuple[int, ...], float],
         theta_points = np.linspace(0, np.pi / 2, 3)
         iteration = 0
         cost_calls = 0
+        print(f"Initial: {list(angles[::-1])}")
 
         while True:
             generators_to_append = []
             existing_dict = pauli_operations.exp_conjugation(algebra_strings, angles, h_element, coefficient_tol)
 
-            for i in range(len(algebra_strings)):
-                generators_to_append.append(algebra_strings[i])
+
+            for i in range(len(algebra_strings) - 1, -1, -1):
+                generators_to_append.insert(0, algebra_strings[i])
                 existing_dict = pauli_operations.exp_conjugation(algebra_strings[i], -angles[i], existing_dict,
                                                                  coefficient_tol)
 
@@ -134,11 +136,11 @@ def optimizer(hamiltonian_dict: dict[tuple[int, ...], float],
                 angles3 = angles.copy()
                 angles3[i] = theta_points[2]
 
-                cost_function1 = _cost_function(angles1[:i + 1], generators_to_append, existing_dict, hamiltonian_dict,
+                cost_function1 = _cost_function(angles1, algebra_strings, h_element, hamiltonian_dict,
                                                 coefficient_tol)
-                cost_function2 = _cost_function(angles2[:i + 1], generators_to_append, existing_dict, hamiltonian_dict,
+                cost_function2 = _cost_function(angles2, algebra_strings, h_element, hamiltonian_dict,
                                                 coefficient_tol)
-                cost_function3 = _cost_function(angles3[:i + 1], generators_to_append, existing_dict, hamiltonian_dict,
+                cost_function3 = _cost_function(angles3, algebra_strings, h_element, hamiltonian_dict,
                                                 coefficient_tol)
                 cost_calls += 3
 
@@ -147,6 +149,7 @@ def optimizer(hamiltonian_dict: dict[tuple[int, ...], float],
                 angle_min = -fit_coefficients[1] / 2 if fit_coefficients[0] < 0 else (np.pi - fit_coefficients[1]) / 2
                 angles[i] = angle_min
 
+            print(f"angles after iteration {iteration+1}: {list(angles[::-1])}")
             iteration += 1
             reversed_angles = np.flip(-angles)
             reversed_strings = algebra_strings[::-1]
