@@ -10,6 +10,7 @@ def iterative_optimizer(hamiltonian_dict: dict[tuple[int, ...], float],
                         initial_angles: list[list[float]] | None = None,
                         method: str = "BFGS",
                         tol: float = 1e-6,
+                        tol_type: str = "rel",
                         iterations: float = None,
                         coefficient_tol: float = 1e-6
                         ) -> dict[str, list[float | tuple[int, ...]] |
@@ -31,6 +32,7 @@ def iterative_optimizer(hamiltonian_dict: dict[tuple[int, ...], float],
                            angles[i],  # type: ignore
                            method=method,
                            tol=tol,
+                           tol_type=tol_type,
                            iterations=iterations,
                            coefficient_tol=coefficient_tol
                            )
