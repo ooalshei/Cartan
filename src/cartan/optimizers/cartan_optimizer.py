@@ -117,6 +117,7 @@ def optimizer(hamiltonian_dict: dict[tuple[int, ...], float],
         theta_points = np.linspace(0, np.pi / 2, 3)
         iteration = 0
         cost_calls = 0
+        cost_function = _cost_function(angles, algebra_strings, h_element, hamiltonian_dict, coefficient_tol)
 
         while True:
             generators_to_append = []
@@ -179,6 +180,54 @@ def optimizer(hamiltonian_dict: dict[tuple[int, ...], float],
                     return {"angles": angles, "k": algebra_strings, "H_diagonal": diagonal_hamiltonian,
                             "H_transformed": transformed_hamiltonian, "rel_error": np.sqrt(error_norm / full_norm),
                             "iterations": iteration, "calls": cost_calls}
+
+            elif tol_type == "cost_fcn":
+                if iteration == iterations:
+                    full_norm = 0
+                    error_norm = 0
+                    diagonal_hamiltonian = transformed_hamiltonian.copy()
+                    for key in transformed_hamiltonian:
+                        c = True
+                        coefficient = abs(transformed_hamiltonian[key]) ** 2
+                        full_norm += coefficient
+                        for string in subalgebra_strings:
+                            if not pauli_operations.string_product(key, string)[2]:
+                                c = False
+                        if not c:
+                            error_norm += coefficient
+                            diagonal_hamiltonian.pop(key)
+
+                    print(f"Total iterations: {iteration}. Relative error: {np.sqrt(error_norm / full_norm)}")
+                    print(f"Total cost function calls: {cost_calls}")
+                    return {"angles": angles, "k": algebra_strings, "H_diagonal": diagonal_hamiltonian,
+                            "H_transformed": transformed_hamiltonian, "rel_error": np.sqrt(error_norm / full_norm),
+                            "iterations": iteration, "calls": cost_calls}
+
+                elif iteration % 10 == 0:
+                    new_cost = _cost_function(angles, algebra_strings, h_element, hamiltonian_dict, coefficient_tol)
+                    if np.abs((cost_function - new_cost)/cost_function) <= tol:
+                        full_norm = 0
+                        error_norm = 0
+                        diagonal_hamiltonian = transformed_hamiltonian.copy()
+                        for key in transformed_hamiltonian:
+                            c = True
+                            coefficient = abs(transformed_hamiltonian[key]) ** 2
+                            full_norm += coefficient
+                            for string in subalgebra_strings:
+                                if not pauli_operations.string_product(key, string)[2]:
+                                    c = False
+                            if not c:
+                                error_norm += coefficient
+                                diagonal_hamiltonian.pop(key)
+
+                        print(f"Total iterations: {iteration}. Relative error: {np.sqrt(error_norm / full_norm)}")
+                        print(f"Total cost function calls: {cost_calls}")
+                        return {"angles": angles, "k": algebra_strings, "H_diagonal": diagonal_hamiltonian,
+                                "H_transformed": transformed_hamiltonian, "rel_error": np.sqrt(error_norm / full_norm),
+                                "iterations": iteration, "calls": cost_calls}
+                    else:
+                        print(f"Iteration: {iteration}. Relative change in cost function: {np.abs((cost_function - new_cost)/cost_function)}")
+                        cost_function = new_cost
 
     else:
         def f(x):
