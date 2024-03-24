@@ -7,7 +7,6 @@ based on the Cartan decomposition procedure. This module provides circuits based
 """
 
 from qiskit import *
-
 from .utils import gate, inverse_gate
 
 
@@ -48,6 +47,43 @@ def xy_gate(circ: QuantumCircuit,
     gate(circ, "Y", i)
 
 
+def iterative_k_unitary(number_of_sites: int,
+                        index: int,
+                        angles: list[float]) -> QuantumCircuit:
+    r"""
+    Generates the compressed circuit for the K unitary of TFIM-like models that shows up in the iterative Cartan
+    decomposition. This assumes that the Cartan subalgebra chosen is ...---Z, ...--Z-, ..., Z---... in this order.
+    It takes the form (0,1), (1,2), ..., (n-2, n-1), where n is the nth subalgebra element and (i,j) is understood to be
+    :math:`\mathrm{e}^{\mathrm{i}\theta_{1}X_i Y_j} \mathrm{e}^{\mathrm{i}\theta_{2}Y_i X_j}`.
+    For the TFIM case, the symmetric k subspace of the last element Z---... is an empty set.
+
+    Parameters:
+    -----------
+    number_of_sites : int
+        The number of sites of the spin model.
+    index : int
+        The index i of the Pauli string. Z appears at the (N - i)th position.
+    angles : list[float]
+        The angles of rotation. The number of angles should be equal to :math:`2 (N - i - 1)`.
+
+    Returns:
+    --------
+    circ : QuantumCircuit
+        The quantum circuit for the unitary.
+    """
+
+    # Consistency check
+    if len(angles) != 2 * (number_of_sites - index - 1):
+        raise Exception(f"Length mismatch. Number of angles should be {2 * (number_of_sites - index - 1)}.")
+
+    circ = QuantumCircuit(number_of_sites)
+    angle_index = len(angles) - 1
+    for i in range(number_of_sites - index - 2, -1, -1):
+        xy_gate(circ, number_of_sites, angles[angle_index - 1], angles[angle_index], i, i + 1)
+        angle_index -= 2
+    return circ
+
+
 def k_unitary(number_of_sites: int,
               angles: list[float]) -> QuantumCircuit:
     r"""
@@ -77,44 +113,14 @@ def k_unitary(number_of_sites: int,
         raise Exception(f"Length mismatch. Number of angles should be {2 * sum(i for i in range(number_of_sites))}.")
 
     circ = QuantumCircuit(number_of_sites)
-    angle_index = 0
-    for i in range(number_of_sites - 1):
-        for j in range(i, -1, -1):
-            xy_gate(circ, number_of_sites, angles[angle_index], angles[angle_index + 1], j, j + 1)
-            angle_index += 2
-    return circ
+    final_index = len(angles)
+    for i in range(number_of_sites - 1, -1, -1):
+        initial_index = final_index - 2 * (number_of_sites - i - 1)
+        print(initial_index)
+        sub_angles = angles[initial_index:final_index]
+        print(final_index)
+        print(sub_angles)
+        circ = circ.compose(iterative_k_unitary(number_of_sites, i, sub_angles))
+        final_index = initial_index
 
-
-def iterative_k_unitary(number_of_sites: int,
-                        index: int,
-                        angles: list[float]) -> QuantumCircuit:
-    r"""
-    Generates the compressed circuit for the K unitary of TFIM-like models that shows up in the iterative Cartan
-    decomposition. This assumes that the Cartan subalgebra chosen is ...---Z, ...--Z-, ..., Z---... in this order. For
-    the TFIM case, the symmetric k subspace of the last element Z---... is an empty set.
-
-    Parameters:
-    -----------
-    number_of_sites : int
-        The number of sites of the spin model.
-    index : int
-        The index i of the Pauli string. Z appears at the (N - i)th position.
-    angles : list[float]
-        The angles of rotation. The number of angles should be equal to :math:`2 (N - i - 1)`.
-
-    Returns:
-    --------
-    circ : QuantumCircuit
-        The quantum circuit for the unitary.
-    """
-
-    # Consistency check
-    if len(angles) != 2 * (number_of_sites - index - 1):
-        raise Exception(f"Length mismatch. Number of angles should be {2 * (number_of_sites - index - 1)}.")
-
-    circ = QuantumCircuit(number_of_sites)
-    angle_index = 0
-    for i in range(number_of_sites - index - 2, -1, -1):
-        xy_gate(circ, number_of_sites, angles[angle_index], angles[angle_index + 1], i, i + 1)
-        angle_index += 2
     return circ
