@@ -116,10 +116,7 @@ def k_unitary(number_of_sites: int,
     final_index = len(angles)
     for i in range(number_of_sites - 1, -1, -1):
         initial_index = final_index - 2 * (number_of_sites - i - 1)
-        print(initial_index)
         sub_angles = angles[initial_index:final_index]
-        print(final_index)
-        print(sub_angles)
         circ = circ.compose(iterative_k_unitary(number_of_sites, i, sub_angles))
         final_index = initial_index
 
