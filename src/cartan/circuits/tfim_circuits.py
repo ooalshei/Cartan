@@ -5,7 +5,6 @@ For Hamiltonians that generate a dynamical Lie algebra like that of the transver
 identities that drastically reduce the number of CNOT gates required to build a circuit for the time evolution unitary
 based on the Cartan decomposition procedure. This module provides circuits based on these simplifications.
 """
-
 from qiskit import *
 from .utils import gate, inverse_gate
 
@@ -71,7 +70,6 @@ def iterative_k_unitary(number_of_sites: int,
     circ : QuantumCircuit
         The quantum circuit for the unitary.
     """
-
     # Consistency check
     if len(angles) != 2 * (number_of_sites - index - 1):
         raise Exception(f"Length mismatch. Number of angles should be {2 * (number_of_sites - index - 1)}.")
@@ -107,7 +105,6 @@ def k_unitary(number_of_sites: int,
     circ : QuantumCircuit
         The quantum circuit for the unitary.
     """
-
     # Consistency check
     if len(angles) != 2 * sum(i for i in range(number_of_sites)):
         raise Exception(f"Length mismatch. Number of angles should be {2 * sum(i for i in range(number_of_sites))}.")

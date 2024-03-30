@@ -1,3 +1,15 @@
+r"""
+cartan_optimizer
+----------------
+This module finds the transformation that places the Hamiltonian into the Cartan subalgebra. For a Cartan Hamiltonian,
+we use the KHK theorem which states that for any given term in :math:`\mathfrak{m}`, we can write
+:math:`\mathfrak{m} = K \mathfrak{h} K^\dagger` where :math:`K \in \mathrm{e}^{i\mathfrak{k}}`. If we pick a
+:math:`v \in \mathfrak{h}` such that :math:`\mathrm{e}^{iv}` is dense in :math:`\mathrm{e}^{i\mathfrak{h}}`, then
+optimizing the function :math:`\langle K v K^\dagger, H\rangle` would find the KHK decomposition.
+
+For a non-Cartan Hamiltonian, we can use the same algorithm but we use :math:`G \in \mathrm{e}^{i\mathfrak{g}}` instead
+of :math:`K`.
+"""
 import numpy as np
 import scipy.optimize as opt
 from .. import pauli_operations

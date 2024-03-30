@@ -3,7 +3,6 @@ utils
 -----
 This module contains useful utility functions commonly used when constructing quantum circuits via qiskit.
 """
-
 from qiskit import *
 
 
@@ -94,7 +93,6 @@ def string_exp_product(generators: list[str | tuple[int, ...]],
     --------
     circ : QuantumCircuit
         The quantum circuit for the unitary.
-
     """
     # Consistency check
     if len(angles) != len(generators):

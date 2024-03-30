@@ -4,7 +4,6 @@ time_evolution
 This module contains functions to find the time evolution unitary in matrix form. It can find the exact unitary, a
 trotterized unitary and the unitary generated from a Cartan decomposition.
 """
-
 import numpy as np
 import scipy.linalg as la
 from numpy.typing import NDArray

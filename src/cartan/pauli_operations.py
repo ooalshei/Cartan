@@ -4,7 +4,6 @@ Pauli Operations
 This module contains several useful operations on Pauli strings. The identity along with the three Pauli matrices are
 interchangeably referred to as (0, 1, 2, 3) or (-, X, Y, Z).
 """
-
 import numpy as np
 
 # These arrays are used to find products of Pauli matrices.
