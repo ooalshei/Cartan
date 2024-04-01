@@ -3,7 +3,7 @@ name = "cartan"
 requires-python = ">=3.11"
 # requires-python = ">=3.9"
 description = "Cartan"
-version = "1.0.0"
+version = "1.0.1"
 authors = [
     { name = "Omar Alsheikh", email = "ooalshei@ncsu.edu" }
 ]
