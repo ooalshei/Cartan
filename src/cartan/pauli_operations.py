@@ -7,8 +7,13 @@ interchangeably referred to as (0, 1, 2, 3) or (-, X, Y, Z).
 import numpy as np
 
 # These arrays are used to find products of Pauli matrices.
-RULES = np.array([1, 3, 1, 3])
-SIGN_RULES = np.array([[1, 1, 1, 1], [1, 1, 1j, -1j], [1, -1j, 1, 1j],
+RULES = np.array([[0, 1, 2, 3],
+                  [1, 0, 3, 2],
+                  [2, 3, 0, 1],
+                  [3, 2, 1, 0]])
+SIGN_RULES = np.array([[1, 1, 1, 1],
+                       [1, 1, 1j, -1j],
+                       [1, -1j, 1, 1j],
                        [1, 1j, -1j, 1]])
 
 # These arrays are used to convert between the string and tuple representations of Pauli matrices.
@@ -16,59 +21,19 @@ NUMBERS_TO_LETTERS = {0: "-", 1: "X", 2: "Y", 3: "Z"}
 LETTERS_TO_NUMBERS = {"-": 0, "X": 1, "Y": 2, "Z": 3}
 
 
-def product(sigma1: int, sigma2: int) -> int:
-    """
-    Finds the unsigned product of two Pauli matrices.
-
-    Parameters:
-    -----------
-    sigma1, sigma2 : int
-        The two Pauli matrices. The integer can be between 0 and 3.
-
-    Returns:
-    --------
-    int
-        The product of two Pauli matrices. The product of any matrix with itself gives 0. The product of any matrix with
-        0 gives the same matrix. The product of any two different non-identity matrices returns the third non-identity
-        matrix
-    """
-    return (sigma1 + sigma2 * RULES[sigma1]) % 4
-
-
-def signed_product(sigma1: int, sigma2: int) -> tuple[int, complex]:
-    r"""
-    Finds the signed product of two Pauli matrices.
-
-    Parameters:
-    -----------
-    sigma1, sigma2 : int
-        The two Pauli matrices. The integer can be between 0 and 3.
-
-    Returns:
-    --------
-    int
-        The unsigned product of two Pauli matrices.
-    complex
-        The sign of the product. If two non-identity matrices are multiplied, the sign will be +i if :math:`\sigma_1
-        \sigma_2 = c \sigma_3` is a cyclic permutation of (X, Y, Z) and -i if it is not.
-    """
-    return product(sigma1, sigma2), complex(SIGN_RULES[sigma1, sigma2])
-
-
-def string_product(
-        string1: tuple[int, ...],
-        string2: tuple[int, ...]) -> tuple[tuple[int, ...], complex, bool]:
+def product(string1: tuple[int],
+            string2: tuple[int]) -> tuple[tuple[int], complex, bool]:
     """
     Returns the signed product of two Pauli strings and whether they commute.
 
     Parameters:
     -----------
-    string1, string2 : tuple[int, ...]
+    string1, string2 : tuple[int]
         The two Pauli strings.
 
     Returns:
     --------
-    result : tuple[int, ...]
+    result : tuple[int]
         The product of the two strings.
     sign : complex
         The sign of the product.
@@ -77,25 +42,21 @@ def string_product(
     """
     # Consistency check
     if len(string1) != len(string2):
-        raise Exception(
-            f"Dimension mismatch ({len(string1)} and {len(string2)})")
+        raise Exception(f"Dimension mismatch ({len(string1)} and {len(string2)})")
 
     string1_array = np.array(string1)
     string2_array = np.array(string2)
     sign = np.prod(SIGN_RULES[string1_array, string2_array])
-    result: tuple[int, ...] = tuple(
-        (string1_array + np.multiply(string2_array, RULES[string1_array])) % 4)
+    result = tuple(RULES[string1_array, string2_array])
 
     if sign.imag == 0:
-        return result, sign, True
+        return result, sign, True  # type: ignore
     else:
-        return result, sign, False
+        return result, sign, False  # type: ignore
 
 
-def strings_to_dict(
-        strings: list[tuple[int, ...]] | tuple[int, ...],
-        coefficients: list[complex] | complex
-) -> dict[tuple[int, ...], complex]:
+def strings_to_dict(strings: list[tuple[int]] | tuple[int],
+                    coefficients: list[complex] | complex) -> dict[tuple[int], complex]:
     """
     Returns a dictionary for a Pauli sentence with the Pauli strings as keys and their corresponding coefficients as
     values.
@@ -119,16 +80,14 @@ def strings_to_dict(
         strings_array = np.squeeze(strings_array, axis=0)
     # Consistency check
     if len(strings_array) != len(coefficients_array):
-        raise Exception(
-            f"Length mismatch - strings: {len(strings_array)}, coefficients: {len(coefficients_array)}"
-        )
+        raise Exception(f"Length mismatch - strings: {len(strings_array)}, coefficients: {len(coefficients_array)}")
 
     strings_tuple = tuple(map(tuple, strings_array))
     return dict(zip(strings_tuple, coefficients_array))
 
 
-def print_letters(sentence: dict[tuple[int, ...], complex] = None,
-                  string_list: list[tuple[int, ...]] = None,
+def print_letters(sentence: dict[tuple[int], complex] = None,
+                  string_list: list[tuple[int]] = None,
                   file: str | None = None) -> None:
     """
     Prints the Pauli sentence with strings represented as (-, X, Y, Z). Must specify one and only one keyword.
@@ -161,9 +120,9 @@ def print_letters(sentence: dict[tuple[int, ...], complex] = None,
         print(letter_list, file=file)
 
 
-def full_sum(sentence1: dict[tuple[int, ...], complex],
-             sentence2: dict[tuple[int, ...], complex],
-             tol: float = 0) -> dict[tuple[int, ...], complex]:
+def full_sum(sentence1: dict[tuple[int], complex],
+             sentence2: dict[tuple[int], complex],
+             tol: float = 0) -> dict[tuple[int], complex]:
     """
     Finds the sum of two Pauli sentences.
 
@@ -188,8 +147,8 @@ def full_sum(sentence1: dict[tuple[int, ...], complex],
     return result
 
 
-def full_product(sentence1: dict[tuple[int, ...], complex],
-                 sentence2: dict[tuple[int, ...], complex],
+def full_product(sentence1: dict[tuple[int], complex],
+                 sentence2: dict[tuple[int], complex],
                  tol: float = 0) -> dict[tuple[int, ...], complex]:
     """
     Finds the product of two Pauli sentences.
@@ -209,7 +168,7 @@ def full_product(sentence1: dict[tuple[int, ...], complex],
     result: dict[tuple[int, ...], complex] = {}
     for key1 in sentence1.keys():
         for key2 in sentence2.keys():
-            string, sign, c = string_product(key1, key2)
+            string, sign, c = product(key1, key2)
             result[string] = result.get(
                 string, 0) + sign * sentence1[key1] * sentence2[key2]
             if abs(result[string]) <= tol:
@@ -218,8 +177,8 @@ def full_product(sentence1: dict[tuple[int, ...], complex],
     return result
 
 
-def string_exp(string: tuple[int, ...],
-               angle: float) -> dict[tuple[int, ...], complex]:
+def string_exp(string: tuple[int],
+               angle: float) -> dict[tuple[int], complex]:
     r"""
     Finds the exponential of a Pauli string :math:`\mathrm{e}^{\mathrm{i} x P} = \cos{x} + \mathrm{i}P\sin{x}`.
 
@@ -243,10 +202,10 @@ def string_exp(string: tuple[int, ...],
     return result
 
 
-def exp_conjugation(generators: list[tuple[int, ...]] | tuple[int, ...],
+def exp_conjugation(generators: list[tuple[int]] | tuple[int],
                     angles: list[float] | float,
-                    sentence: dict[tuple[int, ...], complex],
-                    tol: float = 0) -> dict[tuple[int, ...], float | complex]:
+                    sentence: dict[tuple[int], complex],
+                    tol: float = 0) -> dict[tuple[int], float | complex]:
     r"""
     Returns the conjugation of a Pauli sentence :math:`\mathrm{e}^{\mathrm{i} x_{1} P_1} ...
     \mathrm{e}^{\mathrm{i} x_n P_n} X \mathrm{e}^{-\mathrm{i} x_{n} P_n} ... \mathrm{e}^{-\mathrm{i} x_1 P_1}`.
@@ -270,40 +229,34 @@ def exp_conjugation(generators: list[tuple[int, ...]] | tuple[int, ...],
     # Data reformatting
     angles_array = np.array([angles]).flatten()
     cosine_array = np.cos(2 * angles_array)
-    sine_array = np.sin(2 * angles_array)
+    sine_array = 1j * np.sin(2 * angles_array)
     generators_array = np.array([generators])
     if len(generators_array.shape) > 2:
         generators_array = np.squeeze(generators_array, axis=0)
 
     # Consistency check
     if len(generators_array) != len(angles_array):
-        raise Exception(
-            f"Length mismatch - generators: {len(generators_array)}, angles: {len(angles_array)}"
-        )
+        raise Exception(f"Length mismatch - generators: {len(generators_array)}, angles: {len(angles_array)}")
 
     result = sentence.copy()
     for i in range(len(angles_array) - 1, -1, -1):
         temp: dict[tuple[int, ...], complex] = {}
         for key in result:
             coefficient = result[key]
-            string, sign, c = string_product(tuple(generators_array[i]),
-                                             key)  # type: ignore
+            string, sign, c = product(tuple(generators_array[i]), key)  # type: ignore
             # If the ith exponent commutes with string (key) in the Pauli sentence do nothing
             if c:
                 temp[key] = temp.get(key, 0) + coefficient
             # If it doesn't commute it necessary anticommutes. Perform the operation exp(2ixP).string
             else:
                 temp[key] = temp.get(key, 0) + cosine_array[i] * coefficient
-                temp[string] = temp.get(
-                    string, 0) + sign * 1j * sine_array[i] * coefficient
+                temp[string] = temp.get(string, 0) + sign * sine_array[i] * coefficient
 
                 if abs(temp[string]) <= tol:
                     temp.pop(string)
             if abs(temp[key]) <= tol:
                 temp.pop(key)
-
         result = temp.copy()
-
     return result
 
 

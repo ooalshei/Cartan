@@ -41,9 +41,9 @@ def _mut_irr(length: int, seed: float = np.pi) -> list[float]:
 
 
 def _cost_function(angles: list[float],
-                   algebra_strings: list[tuple[int, ...]],
-                   subalgebra_element: dict[tuple[int, ...], float],
-                   hamiltonian_dict: dict[tuple[int, ...], float],
+                   algebra_strings: list[tuple[int]],
+                   subalgebra_element: dict[tuple[int], float],
+                   hamiltonian_dict: dict[tuple[int], float],
                    tol: float = 0) -> float:
     r"""
     Calculates the cost function :math:`\mathrm{Tr}(KvK^\dag, \mathcal{H})`.
@@ -74,16 +74,15 @@ def _cost_function(angles: list[float],
     return np.real(cost)
 
 
-def optimizer(hamiltonian_dict: dict[tuple[int, ...], float],
-              algebra_strings: list[tuple[int, ...]],
-              subalgebra_strings: list[tuple[int, ...]],
+def optimizer(hamiltonian_dict: dict[tuple[int], float],
+              algebra_strings: list[tuple[int]],
+              subalgebra_strings: list[tuple[int]],
               initial_angles: list[float] | None = None,
               method: str = "BFGS",
               tol: float = 1e-6,
               tol_type: str = "rel",
               iterations: float = None,
-              coefficient_tol: float = 0) -> dict[str, list[float | tuple[int, ...]] |
-                                                       dict[tuple[int, ...], float]]:
+              coefficient_tol: float = 0) -> dict[str, list[float | tuple[int]] | dict[tuple[int], float]]:
     """
     Performs the optimization procedure.
 
@@ -176,7 +175,7 @@ def optimizer(hamiltonian_dict: dict[tuple[int, ...], float],
                     coefficient = abs(transformed_hamiltonian[key]) ** 2
                     full_norm += coefficient
                     for string in subalgebra_strings:
-                        if not pauli_operations.string_product(key, string)[2]:
+                        if not pauli_operations.product(key, string)[2]:
                             c = False
                     if not c:
                         error_norm += coefficient
@@ -203,7 +202,7 @@ def optimizer(hamiltonian_dict: dict[tuple[int, ...], float],
                         coefficient = abs(transformed_hamiltonian[key]) ** 2
                         full_norm += coefficient
                         for string in subalgebra_strings:
-                            if not pauli_operations.string_product(key, string)[2]:
+                            if not pauli_operations.product(key, string)[2]:
                                 c = False
                         if not c:
                             error_norm += coefficient
@@ -226,7 +225,7 @@ def optimizer(hamiltonian_dict: dict[tuple[int, ...], float],
                             coefficient = abs(transformed_hamiltonian[key]) ** 2
                             full_norm += coefficient
                             for string in subalgebra_strings:
-                                if not pauli_operations.string_product(key, string)[2]:
+                                if not pauli_operations.product(key, string)[2]:
                                     c = False
                             if not c:
                                 error_norm += coefficient
@@ -259,7 +258,7 @@ def optimizer(hamiltonian_dict: dict[tuple[int, ...], float],
             coefficient = abs(transformed_hamiltonian[key]) ** 2
             full_norm += coefficient
             for string in subalgebra_strings:
-                if not pauli_operations.string_product(key, string)[2]:
+                if not pauli_operations.product(key, string)[2]:
                     c = False
             if not c:
                 error_norm += coefficient

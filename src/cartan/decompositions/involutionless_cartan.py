@@ -80,7 +80,7 @@ class InvolutionlessCartan(CartanDecomposition):
             t = False
             for i in range(final_index, initial_index, -1):
                 for j in range(i - 1, -1, -1):
-                    string, _, c = pauli_operations.string_product(algebra_list[i], algebra_list[j])
+                    string, _, c = pauli_operations.product(algebra_list[i], algebra_list[j])
                     sign = sign_list[i] * sign_list[j]
 
                     if not c:
@@ -105,7 +105,7 @@ class InvolutionlessCartan(CartanDecomposition):
 
             for g in sorted_algebra_list[1:]:
                 for h in subalgebra_strings:
-                    c = pauli_operations.string_product(g, h)[2]
+                    c = pauli_operations.product(g, h)[2]
                     if not c:
                         break
                     elif h == subalgebra_strings[-1]:
@@ -123,7 +123,7 @@ class InvolutionlessCartan(CartanDecomposition):
 
             for m in sorted_m_strings[1:]:
                 for h in subalgebra_strings:
-                    c = pauli_operations.string_product(m, h)[2]
+                    c = pauli_operations.product(m, h)[2]
                     if not c:
                         break
                     elif h == subalgebra_strings[-1]:

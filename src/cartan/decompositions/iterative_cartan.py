@@ -25,7 +25,7 @@ class IterativeCartan(InvolutionlessCartan):
                     i += 1
 
             for j in range(len(multiplication_closure)):
-                string = pauli_operations.string_product(subalgebra_string, multiplication_closure[j])[0]
+                string = pauli_operations.product(subalgebra_string, multiplication_closure[j])[0]
                 multiplication_closure.append(string)
             multiplication_closure.append(subalgebra_string)
 
@@ -45,7 +45,7 @@ class IterativeCartan(InvolutionlessCartan):
             subspace_strings = []
             i = 0
             while i < len(algebra_strings):
-                c = pauli_operations.string_product(string, algebra_strings[i])[2]
+                c = pauli_operations.product(string, algebra_strings[i])[2]
                 if not c:
                     subspace_strings.append(algebra_strings.pop(i))
                 else:

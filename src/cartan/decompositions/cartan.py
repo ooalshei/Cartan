@@ -533,7 +533,7 @@ class Hamiltonian:
             t = False
             for i in range(final_index, initial_index, -1):
                 for j in range(i - 1, -1, -1):
-                    string, s, c = pauli_operations.string_product(algebra_list[i], algebra_list[j])
+                    string, s, c = pauli_operations.product(algebra_list[i], algebra_list[j])  # type: ignore
 
                     if not c:
                         if string not in algebra_list:
@@ -611,7 +611,7 @@ class CartanDecomposition(Hamiltonian):
                 else:
                     m_strings.append(string)
                     for h in subalgebra_strings:
-                        c = pauli_operations.string_product(string, h)[2]
+                        c = pauli_operations.product(string, h)[2]
                         if c:
                             subalgebra_strings.append(string)
         subalgebra_strings.pop(0)
