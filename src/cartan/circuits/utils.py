@@ -125,7 +125,7 @@ def string_exp_product(generators: list[str | tuple[int, ...]],
         unit_circ = unit_circ.compose(inverse_circuit)
         if barrier:
             unit_circ.barrier()
-        circ = circ + unit_circ
+        circ = circ.compose(unit_circ)
     return circ
 
 
