@@ -333,11 +333,13 @@ class Hamiltonian:
         elif self.model == "Creutz":
             string_list = []
             coefficient_list = []
-            coefficients = [1, 1, 1, np.pi / 4] if parameters is None else parameters
+            coefficients = [1, 1, 1, np.pi / 4, 1, 1] if parameters is None else parameters
             t_cos = -coefficients[0] / 2 * np.cos(coefficients[3])
             t_sin = -coefficients[0] / 2 * np.sin(coefficients[3])
             t_d = -coefficients[1] / 2
             t_v = -coefficients[2] / 2
+            c_z = -(coefficients[5] + 2 * coefficients[4]) / 4
+            c_zz = coefficients[5] / 4
 
             if np.abs(t_cos) >= 1e-10:
                 for i in range(2 * self.N - 2):
@@ -503,6 +505,21 @@ class Hamiltonian:
                     string[i + 1] = 2
                     string_list.append(tuple(string))
                     coefficient_list.append(t_v)
+
+            if c_z != 0:
+                for i in range(2 * self.N):
+                    string = [0] * 2 * self.N
+                    string[i] = 3
+                    string_list.append(tuple(string))
+                    coefficient_list.append(c_z)
+
+            if c_zz != 0:
+                for i in range(0, 2 * self.N - 1, 2):
+                    string = [0] * 2 * self.N
+                    string[i] = 3
+                    string[i + 1] = 3
+                    string_list.append(tuple(string))
+                    coefficient_list.append(c_zz)
 
             return string_list, coefficient_list
 
