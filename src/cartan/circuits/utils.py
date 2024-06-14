@@ -69,7 +69,7 @@ def measure(circ: QuantumCircuit, string: str | tuple[int, ...]) -> None:
     circ.add_register(c)
     for i in range(len(string) - 1, -1, -1):
         if string[i] != "-" and string[i] != 0:
-            inverse_gate(circ, string[i], i)
+            gate(circ, string[i], i)
             circ.measure(i, i)
 
 
@@ -125,7 +125,7 @@ def string_exp_product(generators: list[str | tuple[int, ...]],
         unit_circ = unit_circ.compose(inverse_circuit)
         if barrier:
             unit_circ.barrier()
-        circ = circ + unit_circ
+        circ = circ.compose(unit_circ)
     return circ
 
 
