@@ -147,6 +147,33 @@ def full_sum(sentence1: dict[tuple[int], complex],
     return result
 
 
+def full_diff(sentence1: dict[tuple[int], complex],
+              sentence2: dict[tuple[int], complex],
+              tol: float = 0) -> dict[tuple[int], complex]:
+    """
+    Finds the difference of two Pauli sentences.
+
+    Parameters:
+    -----------
+    sentence1, sentence2 : dict[tuple[int, ...], complex]
+        The two Pauli sentences.
+    tol : float, default=0
+        Tolerance. Non-negative number. Any value less than or equal to the tolerance is considered 0.
+
+    Returns:
+    --------
+    result : dict[tuple[int, ...], complex]
+        The difference of the two Pauli sentences as a dictionary.
+    """
+    result = sentence1.copy()
+    for key in sentence2.keys():
+        result[key] = result.get(key, 0) - sentence2[key]
+        if abs(result[key]) <= tol:
+            result.pop(key)
+
+    return result
+
+
 def full_product(sentence1: dict[tuple[int], complex],
                  sentence2: dict[tuple[int], complex],
                  tol: float = 0) -> dict[tuple[int, ...], complex]:
@@ -168,7 +195,7 @@ def full_product(sentence1: dict[tuple[int], complex],
     result: dict[tuple[int, ...], complex] = {}
     for key1 in sentence1.keys():
         for key2 in sentence2.keys():
-            string, sign, c = product(key1, key2)
+            string, sign, _ = product(key1, key2)
             result[string] = result.get(
                 string, 0) + sign * sentence1[key1] * sentence2[key2]
             if abs(result[string]) <= tol:
