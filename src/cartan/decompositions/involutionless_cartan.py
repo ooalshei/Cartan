@@ -97,7 +97,7 @@ class InvolutionlessCartan(CartanDecomposition):
             final_index = len(algebra_list) - 1
 
         if contradiction:
-            sorting_list = [self.N - string.count(0) for string in algebra_list]
+            sorting_list = [len(algebra_list[0]) - string.count(0) for string in algebra_list]
             sorted_algebra_list = [string for _, string in sorted(zip(sorting_list, algebra_list))]
             subalgebra_strings = [sorted_algebra_list[0]]
             generator_strings = algebra_list.copy()
@@ -117,7 +117,7 @@ class InvolutionlessCartan(CartanDecomposition):
                     "h": subalgebra_strings}
 
         else:
-            sorting_list = [self.N - string.count(0) for string in m_strings]
+            sorting_list = [len(algebra_list[0]) - string.count(0) for string in m_strings]
             sorted_m_strings = [string for _, string in sorted(zip(sorting_list, m_strings))]
             subalgebra_strings = [sorted_m_strings[0]]
 

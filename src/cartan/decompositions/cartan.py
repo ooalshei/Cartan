@@ -615,11 +615,11 @@ class CartanDecomposition(Hamiltonian):
 
         if algebra_list is None:
             algebra_list = self.algebra()
-        sorting_list = [self.N - string.count(0) for string in algebra_list]
+        sorting_list = [len(algebra_list[0]) - string.count(0) for string in algebra_list]
         sorted_algebra_list = [string for _, string in sorted(zip(sorting_list, algebra_list))]
         k_strings = []
         m_strings = []
-        subalgebra_strings = [(0,) * self.N]
+        subalgebra_strings = [(0,) * len(algebra_list[0])]
 
         if involution == "even_odd":
             for string in sorted_algebra_list:
