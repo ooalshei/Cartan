@@ -40,10 +40,15 @@ def iterative_optimizer(hamiltonian_dict: dict[tuple[int], float],
         reversed_angles = np.flip(-angles[i])
         reversed_subspace = result["k"][::-1]
         diagonal_hamiltonian = result["H_diagonal"]
-        calls += result["calls"]
-        relative_error = result["rel_error"]
-        iteration = result["iterations"]
+        if method == 'roto':
+            calls += result["calls"]
+            relative_error = result["rel_error"]
+            iteration = result["iterations"]
         transformed_hamiltonian = exp_conjugation(reversed_subspace, reversed_angles, transformed_hamiltonian)
-    return {"angles": angles, "k": subspace_strings, "H_diagonal": diagonal_hamiltonian,
+    if method == 'roto':
+        return {"angles": angles, "k": subspace_strings, "H_diagonal": diagonal_hamiltonian,
             "H_transformed": transformed_hamiltonian, "rel_error": relative_error,
             "iterations": iteration, "calls": calls}
+    else:
+        return {"angles": angles, "k": subspace_strings, "H_diagonal": diagonal_hamiltonian,
+            "H_transformed": transformed_hamiltonian}
