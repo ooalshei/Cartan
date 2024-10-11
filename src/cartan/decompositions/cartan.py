@@ -57,12 +57,12 @@ class Hamiltonian:
             List of coefficients. Both lists should be of tha same length. Each term corresponds to the respective term
             in string_list.
         """
-        if self.model == 'TFIM':
+        if self.model == 'TFIM' or self.model == "a0":
             string_list = []
             coefficient_list = []
             coefficients = [1, 1] if parameters is None else parameters
             coefficient_xx = -coefficients[0]
-            coefficient_z = -coefficients[0] * coefficients[1]
+            coefficient_z = -coefficients[0] * coefficients[1] if self.model == "TFIM" else 0
 
             if coefficient_xx != 0:
                 for i in range(self.N - 1):
@@ -87,12 +87,12 @@ class Hamiltonian:
 
             return string_list, coefficient_list
 
-        elif self.model == 'TFXY':
+        elif self.model == 'TFXY' or self.model == "a4":
             string_list = []
             coefficient_list = []
             coefficients = [1, 1] if parameters is None else parameters
             coefficient_xy = -coefficients[0]
-            coefficient_z = -coefficients[0] * coefficients[1]
+            coefficient_z = -coefficients[0] * coefficients[1] if self.model == "TFXY" else 0
 
             if coefficient_xy != 0:
                 for i in range(self.N - 1):
@@ -130,7 +130,7 @@ class Hamiltonian:
 
             return string_list, coefficient_list
 
-        elif self.model == 'Heisenberg':
+        elif self.model == 'Heisenberg' or self.model == "a7":
             string_list = []
             coefficients = -1 if parameters is None else -parameters[0]
             coefficient_list = [coefficients] * 3 * (self.N - 1)
@@ -169,6 +169,53 @@ class Hamiltonian:
                 string[-1] = 3
                 string_list.append(tuple(string))
                 coefficient_list.append(coefficients)
+
+            return string_list, coefficient_list
+
+        elif self.model == 'XXZ':
+            string_list = []
+            coefficient_list = []
+            coefficients = [1, 1] if parameters is None else parameters
+            coefficient_xx = -coefficients[0]
+            coefficient_zz = -coefficients[1]
+            if coefficient_xx != 0:
+                for i in range(self.N - 1):
+                    string = [0] * self.N
+                    string[i] = 1
+                    string[i + 1] = 1
+                    string_list.append(tuple(string))
+                    coefficient_list.append(coefficient_xx)
+
+                    string = [0] * self.N
+                    string[i] = 2
+                    string[i + 1] = 2
+                    string_list.append(tuple(string))
+                    coefficient_list.append(coefficient_xx)
+
+                    string = [0] * self.N
+                    string[i] = 3
+                    string[i + 1] = 3
+                    string_list.append(tuple(string))
+                    coefficient_list.append(coefficient_zz)
+
+                    if self.pbc:
+                        string = [0] * self.N
+                        string[0] = 1
+                        string[-1] = 1
+                        string_list.append(tuple(string))
+                        coefficient_list.append(coefficient_xx)
+
+                        string = [0] * self.N
+                        string[0] = 2
+                        string[-1] = 2
+                        string_list.append(tuple(string))
+                        coefficient_list.append(coefficient_xx)
+
+                        string = [0] * self.N
+                        string[0] = 3
+                        string[-1] = 3
+                        string_list.append(tuple(string))
+                        coefficient_list.append(coefficient_zz)
 
             return string_list, coefficient_list
 
@@ -522,6 +569,357 @@ class Hamiltonian:
                     coefficient_list.append(c_zz)
 
             return string_list, coefficient_list
+
+        elif self.model == "GN":
+            string_list = []
+            coefficient_list = []
+            coefficients = [1, 1] if parameters is None else parameters
+
+            for i in range(self.N - 1):
+                string = [0] * 2 * self.N
+                string[i] = 1
+                string[i + 1] = 2
+                string_list.append(tuple(string))
+                coefficient_list.append(-0.5)
+
+                string = [0] * 2 * self.N
+                string[i] = 2
+                string[i + 1] = 1
+                string_list.append(tuple(string))
+                coefficient_list.append(0.5)
+
+                string = [0] * 2 * self.N
+                string[i + self.N] = 1
+                string[i + self.N + 1] = 2
+                string_list.append(tuple(string))
+                coefficient_list.append(-0.5)
+
+                string = [0] * 2 * self.N
+                string[i + self.N] = 2
+                string[i + self.N + 1] = 1
+                string_list.append(tuple(string))
+                coefficient_list.append(0.5)
+
+            for i in range(2 * self.N):
+                string = [0] * 2 * self.N
+                string[i] = 3
+                coefficient = (-1) ** i * coefficients[0] / 2 - coefficients[1] ** 2
+                if coefficient != 0:
+                    string_list.append(tuple(string))
+                    coefficient_list.append((-1) ** i * coefficients[0] / 2 - coefficients[1] ** 2)
+
+            if coefficients[1] != 0:
+                for i in range(self.N):
+                    string = [0] * 2 * self.N
+                    string[i] = 3
+                    string[i + self.N] = 3
+                    string_list.append(tuple(string))
+                    coefficient_list.append(coefficients[1] ** 2 / 2)
+
+            return string_list, coefficient_list
+
+
+        elif self.model == "a1":
+            string_list = []
+            for i in range(self.N - 1):
+                string = [0] * self.N
+                string[i] = 1
+                string[i + 1] = 2
+                string_list.append(tuple(string))
+
+            if self.pbc:
+                string = [0] * self.N
+                string[0] = 2
+                string[-1] = 1
+                string_list.append(tuple(string))
+
+            return string_list, []
+
+        elif self.model == "a2":
+            string_list = Hamiltonian(self.N, "a1", self.pbc).builder()[0]
+            for i in range(self.N - 1):
+                string = [0] * self.N
+                string[i] = 2
+                string[i + 1] = 1
+                string_list.append(tuple(string))
+
+            if self.pbc:
+                string = [0] * self.N
+                string[-1] = 2
+                string[0] = 1
+                string_list.append(tuple(string))
+
+            return string_list, []
+
+        elif self.model == "a3":
+            string_list = Hamiltonian(self.N, "a0", self.pbc).builder()[0]
+            for i in range(self.N - 1):
+                string = [0] * self.N
+                string[i] = 2
+                string[i + 1] = 3
+                string_list.append(tuple(string))
+
+            if self.pbc:
+                string = [0] * self.N
+                string[-1] = 2
+                string[0] = 3
+                string_list.append(tuple(string))
+
+            return string_list, []
+
+        elif self.model == "a5":
+            string_list = Hamiltonian(self.N, "a1", self.pbc).builder()[0]
+            for i in range(self.N - 1):
+                string = [0] * self.N
+                string[i] = 2
+                string[i + 1] = 3
+                string_list.append(tuple(string))
+
+            if self.pbc:
+                string = [0] * self.N
+                string[-1] = 2
+                string[0] = 3
+                string_list.append(tuple(string))
+
+            return string_list, []
+
+        elif self.model == "a6":
+            string_list = Hamiltonian(self.N, "a3", self.pbc).builder()[0]
+            for i in range(self.N - 1):
+                string = [0] * self.N
+                string[i] = 3
+                string[i + 1] = 2
+                string_list.append(tuple(string))
+
+            if self.pbc:
+                string = [0] * self.N
+                string[-1] = 3
+                string[0] = 2
+                string_list.append(tuple(string))
+
+            return string_list, []
+
+        elif self.model == "a8":
+            string_list = Hamiltonian(self.N, "a0", self.pbc).builder()[0]
+            for i in range(self.N - 1):
+                string = [0] * self.N
+                string[i] = 1
+                string[i + 1] = 3
+                string_list.append(tuple(string))
+
+            if self.pbc:
+                string = [0] * self.N
+                string[-1] = 1
+                string[0] = 3
+                string_list.append(tuple(string))
+
+            return string_list, []
+
+        elif self.model == "a9":
+            string_list = Hamiltonian(self.N, "a1", self.pbc).builder()[0]
+            for i in range(self.N - 1):
+                string = [0] * self.N
+                string[i] = 1
+                string[i + 1] = 3
+                string_list.append(tuple(string))
+
+            if self.pbc:
+                string = [0] * self.N
+                string[-1] = 1
+                string[0] = 3
+                string_list.append(tuple(string))
+
+            return string_list, []
+
+        elif self.model == "a10":
+            string_list = Hamiltonian(self.N, "a5", self.pbc).builder()[0]
+            for i in range(self.N - 1):
+                string = [0] * self.N
+                string[i] = 3
+                string[i + 1] = 1
+                string_list.append(tuple(string))
+
+            if self.pbc:
+                string = [0] * self.N
+                string[-1] = 3
+                string[0] = 1
+                string_list.append(tuple(string))
+
+            return string_list, []
+
+        elif self.model == "a11":
+            string_list = Hamiltonian(self.N, "a2", self.pbc).builder()[0]
+            for i in range(self.N - 1):
+                string = [0] * self.N
+                string[i] = 2
+                string[i + 1] = 3
+                string_list.append(tuple(string))
+
+            if self.pbc:
+                string = [0] * self.N
+                string[-1] = 2
+                string[0] = 3
+                string_list.append(tuple(string))
+
+            return string_list, []
+
+        elif self.model == "a12":
+            return (Hamiltonian(self.N, "a0", self.pbc).builder()[0]
+                    + Hamiltonian(self.N, "a5", self.pbc).builder()[0], [])
+
+        elif self.model == "a13":
+            string_list = Hamiltonian(self.N, "a4", self.pbc).builder()[0]
+            for i in range(self.N - 1):
+                string = [0] * self.N
+                string[i] = 2
+                string[i + 1] = 3
+                string_list.append(tuple(string))
+
+            if self.pbc:
+                string = [0] * self.N
+                string[-1] = 2
+                string[0] = 3
+                string_list.append(tuple(string))
+
+            return string_list, []
+
+        elif self.model == "a14":
+            return (Hamiltonian(self.N, "a4", self.pbc).builder()[0]
+                    + Hamiltonian(self.N, "a1", self.pbc).builder()[0], [])
+
+        elif self.model == "a15":
+            return (Hamiltonian(self.N, "a0", self.pbc).builder()[0]
+                    + Hamiltonian(self.N, "a9", self.pbc).builder()[0], [])
+
+        elif self.model == "a16":
+            string_list = Hamiltonian(self.N, "a11", self.pbc).builder()[0]
+            for i in range(self.N - 1):
+                string = [0] * self.N
+                string[i] = 3
+                string[i + 1] = 2
+                string_list.append(tuple(string))
+
+            if self.pbc:
+                string = [0] * self.N
+                string[-1] = 3
+                string[0] = 2
+                string_list.append(tuple(string))
+
+            return string_list, []
+
+        elif self.model == "a17":
+            string_list = (Hamiltonian(self.N, "a0", self.pbc).builder()[0]
+                           + Hamiltonian(self.N, "a1", self.pbc).builder()[0])
+            for i in range(self.N - 1):
+                string = [0] * self.N
+                string[i] = 3
+                string[i + 1] = 1
+                string_list.append(tuple(string))
+
+            if self.pbc:
+                string = [0] * self.N
+                string[-1] = 3
+                string[0] = 1
+                string_list.append(tuple(string))
+
+            return string_list, []
+
+        elif self.model == "a18":
+            string_list = (Hamiltonian(self.N, "a8", self.pbc).builder()[0])
+            for i in range(self.N - 1):
+                string = [0] * self.N
+                string[i] = 2
+                string[i + 1] = 2
+                string_list.append(tuple(string))
+
+                string = [0] * self.N
+                string[i] = 3
+                string[i + 1] = 2
+                string_list.append(tuple(string))
+
+            if self.pbc:
+                string = [0] * self.N
+                string[-1] = 2
+                string[0] = 2
+                string_list.append(tuple(string))
+
+                string = [0] * self.N
+                string[-1] = 3
+                string[0] = 2
+                string_list.append(tuple(string))
+
+            return string_list, []
+
+        elif self.model == "a19":
+            return (Hamiltonian(self.N, "a0", self.pbc).builder()[0]
+                    + Hamiltonian(self.N, "a10", self.pbc).builder()[0], [])
+
+        elif self.model == "a20":
+            string_list = Hamiltonian(self.N, "a7", self.pbc).builder()[0]
+            for i in range(self.N - 1):
+                string = [0] * self.N
+                string[i] = 3
+                string[i + 1] = 2
+                string_list.append(tuple(string))
+
+            if self.pbc:
+                string = [0] * self.N
+                string[-1] = 3
+                string[0] = 2
+                string_list.append(tuple(string))
+
+            return string_list, []
+
+        elif self.model == "a21":
+            string_list = Hamiltonian(self.N, "a14", self.pbc).builder()[0]
+            for i in range(self.N - 1):
+                string = [0] * self.N
+                string[i] = 3
+                string[i + 1] = 1
+                string_list.append(tuple(string))
+
+            if self.pbc:
+                string = [0] * self.N
+                string[-1] = 3
+                string[0] = 1
+                string_list.append(tuple(string))
+
+            return string_list, []
+
+        elif self.model == "a22":
+            return (Hamiltonian(self.N, "a8", self.pbc).builder()[0]
+                    + Hamiltonian(self.N, "a2", self.pbc).builder()[0], [])
+
+        elif self.model == "b0":
+            string_list = []
+            for i in range(self.N):
+                string = [0] * self.N
+                string[i] = 1
+                string_list.append(tuple(string))
+
+            return string_list, []
+
+        elif self.model == "b1":
+            return (Hamiltonian(self.N, "a0", self.pbc).builder()[0]
+                    + Hamiltonian(self.N, "b0", self.pbc).builder()[0], [])
+
+        elif self.model == "b2":
+            return (Hamiltonian(self.N, "a1", self.pbc).builder()[0]
+                    + Hamiltonian(self.N, "b0", self.pbc).builder()[0], [])
+
+        elif self.model == "b3":
+            string_list = Hamiltonian(self.N, "b0", self.pbc).builder()[0]
+            for i in range(self.N):
+                string = [0] * self.N
+                string[i] = 2
+                string_list.append(tuple(string))
+
+            return string_list, []
+
+        elif self.model == "b4":
+            return (Hamiltonian(self.N, "a0", self.pbc).builder()[0]
+                    + Hamiltonian(self.N, "b2", self.pbc).builder()[0], [])
+
 
         else:
             return []  # type: ignore
